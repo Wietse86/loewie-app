@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Loewie" />
+  <title>Loewie 🐾</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --cream: #FAF7F2;
+      --warm-white: #FFFEF9;
+      --sand: #E8DDD0;
+      --tan: #C9B99A;
+      --brown: #7D5A3C;
+      --dark: #2C1A0E;
+      --accent: #D46B3B;
+      --accent-light: #F0A878;
+      --green: #4A7C59;
+      --green-light: #A8C5B0;
+      --red: #C0392B;
+      --blue: #2E6DA4;
+      --shadow: 0 2px 20px rgba(44,26,14,0.08);
+      --shadow-lg: 0 8px 40px rgba(44,26,14,0.15);
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--dark);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* AUTH SCREEN */
+    #auth-screen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: var(--cream);
+    }
+
+    .auth-logo {
+      font-family: 'Fraunces', serif;
+      font-size: 3.5rem;
+      color: var(--brown);
+      margin-bottom: 0.25rem;
+      line-height: 1;
+    }
+
+    .auth-tagline {
+      font-size: 0.95rem;
+      color: var(--tan);
+      margin-bottom: 2.5rem;
+      font-weight: 300;
+    }
+
+    .auth-card {
+      background: var(--warm-white);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .auth-tabs {
+      display: flex;
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      margin-bottom: 1.5rem;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 0.5rem;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--tan);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .auth-tab.active {
+      background: var(--warm-white);
+      color: var(--brown);
+      box-shadow: 0 1px 6px rgba(44,26,14,0.1);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--brown);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid var(--sand);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      color: var(--dark);
+      background: var(--cream);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: var(--accent);
+      background: white;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.85rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-primary:hover { background: var(--brown); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .auth-error {
+      color: var(--red);
+      font-size: 0.85rem;
+      margin-top: 0.75rem;
+      text-align: center;
+    }
+
+    /* MAIN APP */
+    #app { display: none; }
+
+    .app-header {
+      background: var(--warm-white);
+      padding: 1rem 1.25rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 0 var(--sand);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .header-logo {
+      font-family: 'Fraunces', serif;
+      font-size: 1.6rem;
+      color: var(--brown);
+    }
+
+    .header-user {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .btn-logout {
+      background: none;
+      border: none;
+      color: var(--tan);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    /* NAV */
+    .nav-tabs {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .nav-tabs::-webkit-scrollbar { display: none; }
+
+    .nav-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 0.5rem 0.9rem;
+      border: none;
+      background: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--tan);
+      cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-tab .tab-icon { font-size: 1.2rem; }
+    .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* PAGES */
+    .page { display: none; padding: 1.25rem; padding-bottom: 2rem; }
+    .page.active { display: block; }
+
+    .page-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.6rem;
+      color: var(--brown);
+      margin-bottom: 1.25rem;
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--warm-white);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.1rem;
+      color: var(--brown);
+      margin-bottom: 1rem;
+    }
+
+    /* DASHBOARD */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-card {
+      background: var(--warm-white);
+      border-radius: var(--radius);
+      padding: 1rem;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .stat-number {
+      font-family: 'Fraunces', serif;
+      font-size: 2rem;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--tan);
+      font-weight: 500;
+      margin-top: 0.25rem;
+    }
+
+    .week-bar {
+      display: flex;
+      gap: 4px;
+      align-items: flex-end;
+      height: 60px;
+      margin: 0.5rem 0;
+    }
+
+    .week-day {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .week-bar-fill {
+      width: 100%;
+      background: var(--accent-light);
+      border-radius: 4px 4px 0 0;
+      min-height: 4px;
+      transition: height 0.3s;
+    }
+
+    .week-bar-fill.today { background: var(--accent); }
+    .week-day-label { font-size: 0.65rem; color: var(--tan); }
+
+    /* COMMANDS */
+    .command-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.9rem;
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.6rem;
+      transition: all 0.2s;
+    }
+
+    .command-item.practiced-today {
+      background: #EBF5EE;
+      border-left: 3px solid var(--green);
+    }
+
+    .command-check {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--sand);
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      font-size: 1rem;
+    }
+
+    .command-check.checked {
+      background: var(--green);
+      border-color: var(--green);
+      color: white;
+    }
+
+    .command-info { flex: 1; }
+    .command-name { font-weight: 600; font-size: 0.95rem; }
+    .command-meta { font-size: 0.75rem; color: var(--tan); margin-top: 2px; }
+
+    .score-badge {
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .score-0 { background: var(--sand); color: var(--brown); }
+    .score-1 { background: #FEE2E2; color: #B91C1C; }
+    .score-2 { background: #FEF3C7; color: #92400E; }
+    .score-3 { background: #DBEAFE; color: #1E40AF; }
+    .score-4 { background: #D1FAE5; color: #065F46; }
+    .score-5 { background: #A7F3D0; color: #064E3B; }
+
+    .command-delete {
+      background: none;
+      border: none;
+      color: var(--tan);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0.25rem;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+
+    .command-delete:hover { opacity: 1; color: var(--red); }
+
+    /* SCORE MODAL */
+    .score-options {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+    }
+
+    .score-option {
+      flex: 1;
+      min-width: 80px;
+      padding: 0.6rem;
+      border: 2px solid var(--sand);
+      border-radius: var(--radius-sm);
+      background: white;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .score-option:hover, .score-option.selected {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+    }
+
+    .score-option .score-num { font-size: 1.2rem; font-weight: 700; }
+    .score-option .score-text { font-size: 0.7rem; margin-top: 2px; }
+
+    /* WEIGHT */
+    .weight-input-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .input-field {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid var(--sand);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      color: var(--dark);
+      background: white;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus { border-color: var(--accent); }
+
+    .btn-add {
+      padding: 0.75rem 1.25rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-add:hover { background: var(--brown); }
+
+    .chart-container {
+      position: relative;
+      height: 200px;
+      margin-bottom: 1rem;
+    }
+
+    .weight-list { margin-top: 1rem; }
+
+    .weight-entry {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--sand);
+      font-size: 0.9rem;
+    }
+
+    .weight-value { font-weight: 600; color: var(--brown); font-family: 'Fraunces', serif; font-size: 1.1rem; }
+
+    /* FEEDING */
+    .feeding-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .feeding-block {
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .feeding-amount {
+      font-family: 'Fraunces', serif;
+      font-size: 1.8rem;
+      color: var(--accent);
+    }
+
+    .feeding-unit { font-size: 0.75rem; color: var(--tan); }
+    .feeding-label { font-size: 0.8rem; font-weight: 600; margin-top: 0.25rem; }
+
+    /* DIARY */
+    .diary-entry {
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .diary-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .diary-date { font-size: 0.75rem; color: var(--tan); }
+    .diary-author { font-size: 0.75rem; font-weight: 600; color: var(--brown); }
+    .diary-text { font-size: 0.9rem; line-height: 1.5; }
+
+    .diary-photo {
+      width: 100%;
+      border-radius: 8px;
+      margin-top: 0.75rem;
+      object-fit: cover;
+      max-height: 200px;
+    }
+
+    textarea.input-field {
+      resize: vertical;
+      min-height: 80px;
+      width: 100%;
+      margin-bottom: 0.75rem;
+    }
+
+    .file-upload {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .file-label {
+      padding: 0.5rem 1rem;
+      background: var(--cream);
+      border: 1.5px dashed var(--tan);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      color: var(--brown);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .file-label:hover { border-color: var(--accent); }
+    #diary-photo-input, #milestone-photo-input { display: none; }
+
+    /* MILESTONES */
+    .milestone-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--sand);
+      position: relative;
+    }
+
+    .milestone-dot {
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .milestone-content { flex: 1; }
+    .milestone-title { font-weight: 600; font-size: 0.95rem; }
+    .milestone-date { font-size: 0.75rem; color: var(--tan); margin-top: 2px; }
+    .milestone-desc { font-size: 0.85rem; color: #555; margin-top: 0.25rem; }
+
+    .milestone-photo {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    /* HEALTH */
+    .health-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.9rem;
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.6rem;
+    }
+
+    .health-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .health-info { flex: 1; }
+    .health-type { font-weight: 600; font-size: 0.9rem; }
+    .health-desc { font-size: 0.8rem; color: #666; margin-top: 2px; }
+    .health-due { font-size: 0.75rem; color: var(--accent); font-weight: 600; margin-top: 4px; }
+    .health-due.overdue { color: var(--red); }
+
+    .health-delete {
+      background: none;
+      border: none;
+      color: var(--tan);
+      cursor: pointer;
+      font-size: 1rem;
+      opacity: 0.5;
+    }
+
+    .health-delete:hover { opacity: 1; color: var(--red); }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(44,26,14,0.5);
+      z-index: 1000;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--warm-white);
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.3rem;
+      color: var(--brown);
+      margin-bottom: 1rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 0.75rem;
+      background: var(--cream);
+      color: var(--brown);
+      border: 1.5px solid var(--sand);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover { background: var(--sand); }
+
+    .btn-confirm {
+      flex: 1;
+      padding: 0.75rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-confirm:hover { background: var(--brown); }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--dark);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      z-index: 2000;
+      transition: transform 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* SELECT */
+    select.input-field {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C9B99A' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 2.5rem;
+    }
+
+    /* LOADING */
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: var(--tan);
+      font-style: italic;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--tan);
+    }
+
+    .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 52px;
+      height: 52px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(212,107,59,0.4);
+      transition: all 0.2s;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fab:hover { background: var(--brown); transform: scale(1.05); }
+
+    /* HEALTH TYPE ICONS */
+    .health-type-select option { font-size: 1rem; }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--tan);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Responsive tweaks */
+    @media (min-width: 480px) {
+      .app-header { border-radius: 0; }
+      .modal { border-radius: var(--radius); margin-bottom: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-logo">Loewie 🐾</div>
+  <div class="auth-tagline">Jouw puppy trainingsapp</div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Inloggen</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Registreren</button>
+    </div>
+
+    <div id="login-form">
+      <div class="form-group">
+        <label>E-mailadres</label>
+        <input type="email" id="login-email" placeholder="jouw@email.nl" />
+      </div>
+      <div class="form-group">
+        <label>Wachtwoord</label>
+        <input type="password" id="login-password" placeholder="••••••••" />
+      </div>
+      <button class="btn-primary" onclick="handleLogin()">Inloggen</button>
+    </div>
+
+    <div id="register-form" style="display:none">
+      <div class="form-group">
+        <label>Jouw naam</label>
+        <input type="text" id="reg-name" placeholder="Bijv. Wietse" />
+      </div>
+      <div class="form-group">
+        <label>E-mailadres</label>
+        <input type="email" id="reg-email" placeholder="jouw@email.nl" />
+      </div>
+      <div class="form-group">
+        <label>Wachtwoord</label>
+        <input type="password" id="reg-password" placeholder="Min. 6 tekens" />
+      </div>
+      <button class="btn-primary" onclick="handleRegister()">Account aanmaken</button>
+    </div>
+
+    <div id="auth-error" class="auth-error"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="app-header">
+    <div class="header-top">
+      <div class="header-logo">Loewie 🐾</div>
+      <div class="header-user">
+        <div class="avatar" id="user-avatar">W</div>
+        <button class="btn-logout" onclick="handleLogout()">Uitloggen</button>
+      </div>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-tab active" onclick="showPage('dashboard')" data-page="dashboard">
+        <span class="tab-icon">📊</span>Dashboard
+      </button>
+      <button class="nav-tab" onclick="showPage('commands')" data-page="commands">
+        <span class="tab-icon">🎯</span>Commando's
+      </button>
+      <button class="nav-tab" onclick="showPage('weight')" data-page="weight">
+        <span class="tab-icon">⚖️</span>Gewicht
+      </button>
+      <button class="nav-tab" onclick="showPage('feeding')" data-page="feeding">
+        <span class="tab-icon">🍽️</span>Voeding
+      </button>
+      <button class="nav-tab" onclick="showPage('diary')" data-page="diary">
+        <span class="tab-icon">📔</span>Dagboek
+      </button>
+      <button class="nav-tab" onclick="showPage('milestones')" data-page="milestones">
+        <span class="tab-icon">🏆</span>Mijlpalen
+      </button>
+      <button class="nav-tab" onclick="showPage('health')" data-page="health">
+        <span class="tab-icon">💉</span>Gezondheid
+      </button>
+    </nav>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <p class="page-title" id="dashboard-greeting">Goedemorgen!</p>
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-commands-today">0</div>
+        <div class="stat-label">Commando's vandaag</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-weight">–</div>
+        <div class="stat-label">Huidig gewicht (kg)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-milestones">0</div>
+        <div class="stat-label">Mijlpalen bereikt</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-diary">0</div>
+        <div class="stat-label">Dagboek notities</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Training deze week</div>
+      <div class="week-bar" id="week-bar"></div>
+    </div>
+
+    <div class="card" id="dashboard-commands-card">
+      <div class="card-title">Vandaag oefenen</div>
+      <div id="dashboard-commands-list"><div class="loading">Laden...</div></div>
+    </div>
+  </div>
+
+  <!-- COMMANDS -->
+  <div class="page" id="page-commands">
+    <p class="page-title">Commando's 🎯</p>
+    <div id="commands-list"><div class="loading">Laden...</div></div>
+    <button class="fab" onclick="openCommandModal()">+</button>
+  </div>
+
+  <!-- WEIGHT -->
+  <div class="page" id="page-weight">
+    <p class="page-title">Gewicht ⚖️</p>
+    <div class="card">
+      <div class="card-title">Nieuw gewicht invoeren</div>
+      <div class="weight-input-row">
+        <input type="number" class="input-field" id="weight-input" placeholder="bijv. 8.4" step="0.1" min="0" max="100" />
+        <button class="btn-add" onclick="saveWeight()">Opslaan</button>
+      </div>
+      <div class="form-group">
+        <input type="date" class="input-field" id="weight-date" />
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Verloop</div>
+      <div class="chart-container">
+        <canvas id="weight-chart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Historie</div>
+      <div id="weight-list"><div class="loading">Laden...</div></div>
+    </div>
+  </div>
+
+  <!-- FEEDING -->
+  <div class="page" id="page-feeding">
+    <p class="page-title">Voeding 🍽️</p>
+    <div class="card">
+      <div class="card-title">Advies op basis van gewicht</div>
+      <div id="feeding-advice">
+        <p style="color:var(--tan); font-size:0.9rem;">Voer eerst een gewicht in om voedingsadvies te zien.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Voeding invoeren</div>
+      <div class="form-group">
+        <label>Datum</label>
+        <input type="date" class="input-field" id="feeding-date" />
+      </div>
+      <div class="feeding-grid">
+        <div>
+          <div class="section-label">Natvoer (gram)</div>
+          <input type="number" class="input-field" id="feeding-wet" placeholder="bijv. 150" />
+        </div>
+        <div>
+          <div class="section-label">Brokken (gram)</div>
+          <input type="number" class="input-field" id="feeding-dry" placeholder="bijv. 80" />
+        </div>
+      </div>
+      <input type="text" class="input-field" id="feeding-notes" placeholder="Notitie (optioneel)" style="margin-bottom:0.75rem" />
+      <button class="btn-add" style="width:100%" onclick="saveFeeding()">Opslaan</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Historie</div>
+      <div id="feeding-list"><div class="loading">Laden...</div></div>
+    </div>
+  </div>
+
+  <!-- DIARY -->
+  <div class="page" id="page-diary">
+    <p class="page-title">Dagboek 📔</p>
+    <div class="card">
+      <div class="card-title">Nieuwe notitie</div>
+      <textarea class="input-field" id="diary-text" placeholder="Hoe ging het vandaag met Loewie?"></textarea>
+      <div class="file-upload">
+        <label class="file-label" for="diary-photo-input">📷 Foto toevoegen</label>
+        <input type="file" id="diary-photo-input" accept="image/*" onchange="previewDiaryPhoto(this)" />
+        <span id="diary-photo-name" style="font-size:0.8rem; color:var(--tan)"></span>
+      </div>
+      <img id="diary-photo-preview" style="display:none; width:100%; border-radius:8px; margin-bottom:0.75rem; max-height:150px; object-fit:cover" />
+      <button class="btn-add" style="width:100%" onclick="saveDiaryEntry()">Opslaan</button>
+    </div>
+    <div id="diary-list"><div class="loading">Laden...</div></div>
+  </div>
+
+  <!-- MILESTONES -->
+  <div class="page" id="page-milestones">
+    <p class="page-title">Mijlpalen 🏆</p>
+    <div id="milestones-list"><div class="loading">Laden...</div></div>
+    <button class="fab" onclick="openMilestoneModal()">+</button>
+  </div>
+
+  <!-- HEALTH -->
+  <div class="page" id="page-health">
+    <p class="page-title">Gezondheid 💉</p>
+    <div id="health-list"><div class="loading">Laden...</div></div>
+    <button class="fab" onclick="openHealthModal()">+</button>
+  </div>
+</div>
+
+<!-- MODALS -->
+
+<!-- Score Modal -->
+<div class="modal-overlay" id="score-modal">
+  <div class="modal">
+    <div class="modal-title" id="score-modal-title">Commando geoefend</div>
+    <p style="font-size:0.85rem; color:var(--tan); margin-bottom:0.5rem">Hoe goed ging het?</p>
+    <div class="score-options">
+      <div class="score-option" onclick="selectScore(1)"><div class="score-num">1</div><div class="score-text">Beginner</div></div>
+      <div class="score-option" onclick="selectScore(2)"><div class="score-num">2</div><div class="score-text">Gaat wel</div></div>
+      <div class="score-option" onclick="selectScore(3)"><div class="score-num">3</div><div class="score-text">Aardig</div></div>
+      <div class="score-option" onclick="selectScore(4)"><div class="score-num">4</div><div class="score-text">Goed</div></div>
+      <div class="score-option" onclick="selectScore(5)"><div class="score-num">5</div><div class="score-text">Beheerst!</div></div>
+    </div>
+    <textarea class="input-field" id="score-notes" placeholder="Notitie (optioneel)"></textarea>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('score-modal')">Annuleren</button>
+      <button class="btn-confirm" onclick="saveCommandSession()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Command Modal -->
+<div class="modal-overlay" id="command-modal">
+  <div class="modal">
+    <div class="modal-title">Nieuw commando</div>
+    <div class="form-group">
+      <label>Naam</label>
+      <input type="text" class="input-field" id="cmd-name" placeholder="bijv. Zit, Af, Hier" style="width:100%" />
+    </div>
+    <div class="form-group">
+      <label>Omschrijving (optioneel)</label>
+      <input type="text" class="input-field" id="cmd-desc" placeholder="bijv. Hond gaat zitten op commando" style="width:100%" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('command-modal')">Annuleren</button>
+      <button class="btn-confirm" onclick="saveCommand()">Toevoegen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Milestone Modal -->
+<div class="modal-overlay" id="milestone-modal">
+  <div class="modal">
+    <div class="modal-title">Nieuwe mijlpaal 🏆</div>
+    <div class="form-group">
+      <label>Titel</label>
+      <input type="text" class="input-field" id="milestone-title" placeholder="bijv. Eerste keer los lopen!" style="width:100%" />
+    </div>
+    <div class="form-group">
+      <label>Omschrijving</label>
+      <textarea class="input-field" id="milestone-desc" placeholder="Vertel erover..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Datum</label>
+      <input type="date" class="input-field" id="milestone-date" style="width:100%" />
+    </div>
+    <div class="file-upload">
+      <label class="file-label" for="milestone-photo-input">📷 Foto toevoegen</label>
+      <input type="file" id="milestone-photo-input" accept="image/*" onchange="previewMilestonePhoto(this)" />
+      <span id="milestone-photo-name" style="font-size:0.8rem; color:var(--tan)"></span>
+    </div>
+    <img id="milestone-photo-preview" style="display:none; width:100%; border-radius:8px; margin-bottom:0.75rem; max-height:150px; object-fit:cover" />
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('milestone-modal')">Annuleren</button>
+      <button class="btn-confirm" onclick="saveMilestone()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Health Modal -->
+<div class="modal-overlay" id="health-modal">
+  <div class="modal">
+    <div class="modal-title">Gezondheid toevoegen</div>
+    <div class="form-group">
+      <label>Type</label>
+      <select class="input-field" id="health-type" style="width:100%">
+        <option value="Vaccinatie">💉 Vaccinatie</option>
+        <option value="Ontwormen">🐛 Ontwormen</option>
+        <option value="Vlooienbehandeling">🦟 Vlooienbehandeling</option>
+        <option value="Dierenarts">🏥 Dierenarts bezoek</option>
+        <option value="Medicatie">💊 Medicatie</option>
+        <option value="Anders">📋 Anders</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Omschrijving</label>
+      <input type="text" class="input-field" id="health-desc" placeholder="bijv. Parvovirus vaccin" style="width:100%" />
+    </div>
+    <div class="form-group">
+      <label>Volgende afspraak / vervaldatum (optioneel)</label>
+      <input type="date" class="input-field" id="health-due" style="width:100%" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('health-modal')">Annuleren</button>
+      <button class="btn-confirm" onclick="saveHealth()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ============================================================
+  // SUPABASE SETUP
+  // ============================================================
+  const SUPABASE_URL = 'https://whhjvuvsvlnbmnoruzgr.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_c8Xw3YlUCZGzIx_gLNf80A_KpeKKm-E';
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let currentUser = null;
+  let currentUserName = '';
+  let selectedScore = null;
+  let activeCommandId = null;
+  let weightChart = null;
+  let diaryPhotoFile = null;
+  let milestonePhotoFile = null;
+
+  // ============================================================
+  // AUTH
+  // ============================================================
+  function switchAuthTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+    document.getElementById('auth-error').textContent = '';
+  }
+
+  async function handleLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn = event.target;
+    btn.disabled = true; btn.textContent = 'Bezig...';
+
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      document.getElementById('auth-error').textContent = 'Inloggen mislukt. Controleer je gegevens.';
+      btn.disabled = false; btn.textContent = 'Inloggen';
+    }
+  }
+
+  async function handleRegister() {
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const btn = event.target;
+
+    if (!name || !email || !password) {
+      document.getElementById('auth-error').textContent = 'Vul alle velden in.';
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Bezig...';
+    const { data, error } = await sb.auth.signUp({ email, password });
+
+    if (error) {
+      document.getElementById('auth-error').textContent = error.message;
+      btn.disabled = false; btn.textContent = 'Account aanmaken';
+      return;
+    }
+
+    if (data.user) {
+      await sb.from('profiles').upsert({ id: data.user.id, name });
+    }
+  }
+
+  async function handleLogout() {
+    await sb.auth.signOut();
+  }
+
+  // ============================================================
+  // SESSION
+  // ============================================================
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (session?.user) {
+      currentUser = session.user;
+      const { data: profile } = await sb.from('profiles').select('name').eq('id', currentUser.id).single();
+      currentUserName = profile?.name || currentUser.email.split('@')[0];
+      document.getElementById('user-avatar').textContent = currentUserName[0].toUpperCase();
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      initApp();
+    } else {
+      currentUser = null;
+      document.getElementById('auth-screen').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+    }
+  });
+
+  // ============================================================
+  // NAVIGATION
+  // ============================================================
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    document.querySelector(`[data-page="${name}"]`).classList.add('active');
+
+    // Lazy load
+    if (name === 'commands') loadCommands();
+    if (name === 'weight') loadWeight();
+    if (name === 'feeding') loadFeeding();
+    if (name === 'diary') loadDiary();
+    if (name === 'milestones') loadMilestones();
+    if (name === 'health') loadHealth();
+  }
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  function initApp() {
+    setDashboardGreeting();
+    setDefaultDates();
+    loadDashboard();
+  }
+
+  function setDefaultDates() {
+    const today = new Date().toISOString().split('T')[0];
+    ['weight-date', 'feeding-date', 'milestone-date'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = today;
+    });
+  }
+
+  function setDashboardGreeting() {
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? 'Goedemorgen' : hour < 17 ? 'Goedemiddag' : 'Goedenavond';
+    document.getElementById('dashboard-greeting').textContent = `${greet}, ${currentUserName}! 👋`;
+  }
+
+  // ============================================================
+  // DASHBOARD
+  // ============================================================
+  async function loadDashboard() {
+    const today = new Date().toISOString().split('T')[0];
+
+    // Commands today
+    const { data: sessions } = await sb.from('command_sessions')
+      .select('id')
+      .gte('practiced_at', today + 'T00:00:00')
+      .lte('practiced_at', today + 'T23:59:59');
+    document.getElementById('stat-commands-today').textContent = sessions?.length || 0;
+
+    // Latest weight
+    const { data: weights } = await sb.from('weight_entries').select('weight_kg').order('recorded_at', { ascending: false }).limit(1);
+    document.getElementById('stat-weight').textContent = weights?.[0]?.weight_kg || '–';
+
+    // Milestones count
+    const { count: mCount } = await sb.from('milestones').select('id', { count: 'exact', head: true });
+    document.getElementById('stat-milestones').textContent = mCount || 0;
+
+    // Diary count
+    const { count: dCount } = await sb.from('diary_entries').select('id', { count: 'exact', head: true });
+    document.getElementById('stat-diary').textContent = dCount || 0;
+
+    // Week bar
+    await loadWeekBar();
+
+    // Dashboard commands
+    await loadDashboardCommands();
+  }
+
+  async function loadWeekBar() {
+    const days = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0=Sun
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+
+    let html = '';
+    let maxCount = 1;
+    const counts = [];
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const dateStr = d.toISOString().split('T')[0];
+      const { data } = await sb.from('command_sessions')
+        .select('id')
+        .gte('practiced_at', dateStr + 'T00:00:00')
+        .lte('practiced_at', dateStr + 'T23:59:59');
+      const count = data?.length || 0;
+      counts.push({ count, dateStr, dayLabel: days[i] });
+      if (count > maxCount) maxCount = count;
+    }
+
+    const todayStr = now.toISOString().split('T')[0];
+    counts.forEach(({ count, dateStr, dayLabel }) => {
+      const height = Math.max(4, (count / maxCount) * 50);
+      const isToday = dateStr === todayStr;
+      html += `<div class="week-day">
+        <div class="week-bar-fill ${isToday ? 'today' : ''}" style="height:${height}px"></div>
+        <div class="week-day-label">${dayLabel}</div>
+      </div>`;
+    });
+
+    document.getElementById('week-bar').innerHTML = html;
+  }
+
+  async function loadDashboardCommands() {
+    const { data: commands } = await sb.from('commands').select('*').order('name');
+    if (!commands?.length) {
+      document.getElementById('dashboard-commands-list').innerHTML = '<p style="color:var(--tan);font-size:0.9rem">Nog geen commando\'s. Voeg ze toe via het Commando\'s tabblad!</p>';
+      return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const { data: todaySessions } = await sb.from('command_sessions')
+      .select('command_id')
+      .gte('practiced_at', today + 'T00:00:00');
+    const practicedIds = new Set(todaySessions?.map(s => s.command_id) || []);
+
+    let html = '';
+    commands.slice(0, 5).forEach(cmd => {
+      const practiced = practicedIds.has(cmd.id);
+      html += `<div class="command-item ${practiced ? 'practiced-today' : ''}">
+        <div class="command-check ${practiced ? 'checked' : ''}" onclick="openScoreModal('${cmd.id}', '${cmd.name}')">
+          ${practiced ? '✓' : ''}
+        </div>
+        <div class="command-info">
+          <div class="command-name">${cmd.name}</div>
+        </div>
+      </div>`;
+    });
+
+    document.getElementById('dashboard-commands-list').innerHTML = html;
+  }
+
+  // ============================================================
+  // COMMANDS
+  // ============================================================
+  async function loadCommands() {
+    const { data: commands } = await sb.from('commands').select('*').order('name');
+    const today = new Date().toISOString().split('T')[0];
+    const { data: todaySessions } = await sb.from('command_sessions')
+      .select('command_id, score')
+      .gte('practiced_at', today + 'T00:00:00');
+
+    const sessionMap = {};
+    todaySessions?.forEach(s => { sessionMap[s.command_id] = s.score; });
+
+    // Get best scores
+    const { data: allSessions } = await sb.from('command_sessions').select('command_id, score');
+    const bestScores = {};
+    allSessions?.forEach(s => {
+      if (!bestScores[s.command_id] || s.score > bestScores[s.command_id]) {
+        bestScores[s.command_id] = s.score;
+      }
+    });
+
+    if (!commands?.length) {
+      document.getElementById('commands-list').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🎯</div>
+          <p>Nog geen commando's. Tik op + om te beginnen!</p>
+        </div>`;
+      return;
+    }
+
+    const scoreLabels = { 0: 'Niet geoefend', 1: 'Beginner', 2: 'Gaat wel', 3: 'Aardig', 4: 'Goed', 5: 'Beheerst!' };
+    let html = '';
+    commands.forEach(cmd => {
+      const practicedToday = cmd.id in sessionMap;
+      const score = bestScores[cmd.id] || 0;
+      html += `<div class="command-item ${practicedToday ? 'practiced-today' : ''}">
+        <div class="command-check ${practicedToday ? 'checked' : ''}" onclick="openScoreModal('${cmd.id}', '${cmd.name}')">
+          ${practicedToday ? '✓' : ''}
+        </div>
+        <div class="command-info">
+          <div class="command-name">${cmd.name}</div>
+          <div class="command-meta">${cmd.description || ''}</div>
+        </div>
+        <div class="score-badge score-${score}">${scoreLabels[score]}</div>
+        <button class="command-delete" onclick="deleteCommand('${cmd.id}')">🗑️</button>
+      </div>`;
+    });
+
+    document.getElementById('commands-list').innerHTML = html;
+  }
+
+  function openCommandModal() {
+    document.getElementById('cmd-name').value = '';
+    document.getElementById('cmd-desc').value = '';
+    document.getElementById('command-modal').classList.add('open');
+  }
+
+  async function saveCommand() {
+    const name = document.getElementById('cmd-name').value.trim();
+    if (!name) return;
+    const desc = document.getElementById('cmd-desc').value.trim();
+    await sb.from('commands').insert({ name, description: desc });
+    closeModal('command-modal');
+    showToast('Commando toegevoegd! 🎯');
+    loadCommands();
+    loadDashboard();
+  }
+
+  async function deleteCommand(id) {
+    if (!confirm('Commando verwijderen?')) return;
+    await sb.from('commands').delete().eq('id', id);
+    showToast('Commando verwijderd');
+    loadCommands();
+  }
+
+  function openScoreModal(commandId, commandName) {
+    activeCommandId = commandId;
+    selectedScore = null;
+    document.getElementById('score-modal-title').textContent = `"${commandName}" geoefend`;
+    document.getElementById('score-notes').value = '';
+    document.querySelectorAll('.score-option').forEach(o => o.classList.remove('selected'));
+    document.getElementById('score-modal').classList.add('open');
+  }
+
+  function selectScore(score) {
+    selectedScore = score;
+    document.querySelectorAll('.score-option').forEach((o, i) => {
+      o.classList.toggle('selected', i + 1 === score);
+    });
+  }
+
+  async function saveCommandSession() {
+    if (!selectedScore) { showToast('Kies een score!'); return; }
+    const notes = document.getElementById('score-notes').value.trim();
+    await sb.from('command_sessions').insert({
+      command_id: activeCommandId,
+      user_id: currentUser.id,
+      score: selectedScore,
+      notes,
+      practiced_at: new Date().toISOString()
+    });
+    closeModal('score-modal');
+    showToast('Goed bezig! 💪');
+    loadCommands();
+    loadDashboard();
+  }
+
+  // ============================================================
+  // WEIGHT
+  // ============================================================
+  async function loadWeight() {
+    const { data } = await sb.from('weight_entries').select('*').order('recorded_at', { ascending: true });
+
+    if (!data?.length) {
+      document.getElementById('weight-list').innerHTML = '<div class="empty-state"><div class="empty-icon">⚖️</div><p>Nog geen gewicht ingevoerd</p></div>';
+      renderWeightChart([]);
+      return;
+    }
+
+    renderWeightChart(data);
+
+    let html = '';
+    [...data].reverse().forEach(entry => {
+      const date = new Date(entry.recorded_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+      html += `<div class="weight-entry">
+        <div>
+          <div class="weight-value">${entry.weight_kg} kg</div>
+          <div style="font-size:0.75rem;color:var(--tan)">${date}</div>
+        </div>
+        ${entry.notes ? `<div style="font-size:0.8rem;color:#666">${entry.notes}</div>` : ''}
+      </div>`;
+    });
+    document.getElementById('weight-list').innerHTML = html;
+  }
+
+  function renderWeightChart(data) {
+    const ctx = document.getElementById('weight-chart').getContext('2d');
+    if (weightChart) weightChart.destroy();
+
+    weightChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: data.map(d => new Date(d.recorded_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })),
+        datasets: [{
+          label: 'Gewicht (kg)',
+          data: data.map(d => d.weight_kg),
+          borderColor: '#D46B3B',
+          backgroundColor: 'rgba(212,107,59,0.1)',
+          tension: 0.4,
+          fill: true,
+          pointBackgroundColor: '#D46B3B',
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: false, grid: { color: 'rgba(0,0,0,0.05)' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  async function saveWeight() {
+    const kg = parseFloat(document.getElementById('weight-input').value);
+    const date = document.getElementById('weight-date').value;
+    if (!kg || kg <= 0) { showToast('Voer een geldig gewicht in'); return; }
+    await sb.from('weight_entries').insert({ weight_kg: kg, recorded_at: date + 'T12:00:00' });
+    document.getElementById('weight-input').value = '';
+    showToast('Gewicht opgeslagen! ⚖️');
+    loadWeight();
+    loadDashboard();
+    loadFeeding();
+  }
+
+  // ============================================================
+  // FEEDING
+  // ============================================================
+  async function loadFeeding() {
+    // Get latest weight for advice
+    const { data: weights } = await sb.from('weight_entries').select('weight_kg').order('recorded_at', { ascending: false }).limit(1);
+    const weight = weights?.[0]?.weight_kg;
+
+    if (weight) {
+      // Simple puppy feeding formula (approximate)
+      const dailyCalories = weight * 100; // rough estimate kcal/day for puppy
+      const wetGrams = Math.round(weight * 40); // ~40g natvoer per kg
+      const dryGrams = Math.round(weight * 20); // ~20g brokken per kg
+      document.getElementById('feeding-advice').innerHTML = `
+        <p style="font-size:0.85rem;color:var(--tan);margin-bottom:0.75rem">Op basis van ${weight} kg lichaamsgewicht:</p>
+        <div class="feeding-grid">
+          <div class="feeding-block">
+            <div class="feeding-amount">${wetGrams}g</div>
+            <div class="feeding-unit">per dag</div>
+            <div class="feeding-label">🥫 Natvoer</div>
+          </div>
+          <div class="feeding-block">
+            <div class="feeding-amount">${dryGrams}g</div>
+            <div class="feeding-unit">per dag</div>
+            <div class="feeding-label">🥣 Brokken</div>
+          </div>
+        </div>
+        <p style="font-size:0.75rem;color:var(--tan);margin-top:0.5rem">💡 Dit is een richtlijn. Raadpleeg je dierenarts voor persoonlijk advies.</p>`;
+    }
+
+    // Load history
+    const { data } = await sb.from('feeding_entries').select('*').order('recorded_at', { ascending: false }).limit(20);
+
+    if (!data?.length) {
+      document.getElementById('feeding-list').innerHTML = '<div class="empty-state"><div class="empty-icon">🍽️</div><p>Nog geen voeding ingevoerd</p></div>';
+      return;
+    }
+
+    let html = '';
+    data.forEach(entry => {
+      const date = new Date(entry.recorded_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+      html += `<div class="weight-entry">
+        <div>
+          <div style="font-weight:600;font-size:0.9rem">${date}</div>
+          ${entry.notes ? `<div style="font-size:0.75rem;color:var(--tan)">${entry.notes}</div>` : ''}
+        </div>
+        <div style="text-align:right;font-size:0.85rem">
+          ${entry.wet_food_grams ? `<div>🥫 ${entry.wet_food_grams}g</div>` : ''}
+          ${entry.dry_food_grams ? `<div>🥣 ${entry.dry_food_grams}g</div>` : ''}
+        </div>
+      </div>`;
+    });
+    document.getElementById('feeding-list').innerHTML = html;
+  }
+
+  async function saveFeeding() {
+    const wet = parseFloat(document.getElementById('feeding-wet').value) || null;
+    const dry = parseFloat(document.getElementById('feeding-dry').value) || null;
+    const date = document.getElementById('feeding-date').value;
+    const notes = document.getElementById('feeding-notes').value.trim();
+
+    if (!wet && !dry) { showToast('Vul minimaal één hoeveelheid in'); return; }
+
+    await sb.from('feeding_entries').insert({
+      wet_food_grams: wet,
+      dry_food_grams: dry,
+      recorded_at: date + 'T12:00:00',
+      notes
+    });
+
+    document.getElementById('feeding-wet').value = '';
+    document.getElementById('feeding-dry').value = '';
+    document.getElementById('feeding-notes').value = '';
+    showToast('Voeding opgeslagen! 🍽️');
+    loadFeeding();
+  }
+
+  // ============================================================
+  // DIARY
+  // ============================================================
+  async function loadDiary() {
+    const { data } = await sb.from('diary_entries')
+      .select('*, profiles(name)')
+      .order('recorded_at', { ascending: false });
+
+    if (!data?.length) {
+      document.getElementById('diary-list').innerHTML = '<div class="empty-state"><div class="empty-icon">📔</div><p>Nog geen dagboeknotities. Schrijf de eerste!</p></div>';
+      return;
+    }
+
+    let html = '';
+    data.forEach(entry => {
+      const date = new Date(entry.recorded_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+      const author = entry.profiles?.name || 'Onbekend';
+      html += `<div class="diary-entry">
+        <div class="diary-header">
+          <div class="diary-date">${date}</div>
+          <div class="diary-author">${author}</div>
+        </div>
+        <div class="diary-text">${entry.content}</div>
+        ${entry.photo_url ? `<img class="diary-photo" src="${entry.photo_url}" alt="Foto" />` : ''}
+      </div>`;
+    });
+    document.getElementById('diary-list').innerHTML = html;
+  }
+
+  function previewDiaryPhoto(input) {
+    diaryPhotoFile = input.files[0];
+    if (diaryPhotoFile) {
+      document.getElementById('diary-photo-name').textContent = diaryPhotoFile.name;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const preview = document.getElementById('diary-photo-preview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(diaryPhotoFile);
+    }
+  }
+
+  async function saveDiaryEntry() {
+    const content = document.getElementById('diary-text').value.trim();
+    if (!content) { showToast('Schrijf eerst iets!'); return; }
+
+    let photoUrl = null;
+
+    if (diaryPhotoFile) {
+      const fileName = `diary/${currentUser.id}/${Date.now()}_${diaryPhotoFile.name}`;
+      const { data: uploadData, error } = await sb.storage.from('photos').upload(fileName, diaryPhotoFile);
+      if (!error) {
+        const { data: urlData } = sb.storage.from('photos').getPublicUrl(fileName);
+        photoUrl = urlData.publicUrl;
+      }
+    }
+
+    await sb.from('diary_entries').insert({
+      user_id: currentUser.id,
+      content,
+      photo_url: photoUrl,
+      recorded_at: new Date().toISOString()
+    });
+
+    document.getElementById('diary-text').value = '';
+    document.getElementById('diary-photo-name').textContent = '';
+    document.getElementById('diary-photo-preview').style.display = 'none';
+    diaryPhotoFile = null;
+    showToast('Notitie opgeslagen! 📔');
+    loadDiary();
+  }
+
+  // ============================================================
+  // MILESTONES
+  // ============================================================
+  async function loadMilestones() {
+    const { data } = await sb.from('milestones')
+      .select('*, profiles(name)')
+      .order('achieved_at', { ascending: false });
+
+    if (!data?.length) {
+      document.getElementById('milestones-list').innerHTML = '<div class="empty-state"><div class="empty-icon">🏆</div><p>Nog geen mijlpalen. Voeg Loewie\'s eerste toe!</p></div>';
+      return;
+    }
+
+    let html = '<div class="card">';
+    data.forEach(m => {
+      const date = new Date(m.achieved_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+      html += `<div class="milestone-item">
+        <div class="milestone-dot"></div>
+        <div class="milestone-content">
+          <div class="milestone-title">${m.title}</div>
+          <div class="milestone-date">${date} · ${m.profiles?.name || ''}</div>
+          ${m.description ? `<div class="milestone-desc">${m.description}</div>` : ''}
+        </div>
+        ${m.photo_url ? `<img class="milestone-photo" src="${m.photo_url}" alt="Foto" />` : ''}
+      </div>`;
+    });
+    html += '</div>';
+    document.getElementById('milestones-list').innerHTML = html;
+  }
+
+  function openMilestoneModal() {
+    document.getElementById('milestone-title').value = '';
+    document.getElementById('milestone-desc').value = '';
+    document.getElementById('milestone-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('milestone-photo-preview').style.display = 'none';
+    document.getElementById('milestone-photo-name').textContent = '';
+    milestonePhotoFile = null;
+    document.getElementById('milestone-modal').classList.add('open');
+  }
+
+  function previewMilestonePhoto(input) {
+    milestonePhotoFile = input.files[0];
+    if (milestonePhotoFile) {
+      document.getElementById('milestone-photo-name').textContent = milestonePhotoFile.name;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const preview = document.getElementById('milestone-photo-preview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(milestonePhotoFile);
+    }
+  }
+
+  async function saveMilestone() {
+    const title = document.getElementById('milestone-title').value.trim();
+    const desc = document.getElementById('milestone-desc').value.trim();
+    const date = document.getElementById('milestone-date').value;
+    if (!title) { showToast('Voer een titel in'); return; }
+
+    let photoUrl = null;
+    if (milestonePhotoFile) {
+      const fileName = `milestones/${currentUser.id}/${Date.now()}_${milestonePhotoFile.name}`;
+      const { error } = await sb.storage.from('photos').upload(fileName, milestonePhotoFile);
+      if (!error) {
+        const { data: urlData } = sb.storage.from('photos').getPublicUrl(fileName);
+        photoUrl = urlData.publicUrl;
+      }
+    }
+
+    await sb.from('milestones').insert({
+      user_id: currentUser.id,
+      title,
+      description: desc,
+      photo_url: photoUrl,
+      achieved_at: date + 'T12:00:00'
+    });
+
+    closeModal('milestone-modal');
+    showToast('Mijlpaal opgeslagen! 🏆');
+    loadMilestones();
+    loadDashboard();
+  }
+
+  // ============================================================
+  // HEALTH
+  // ============================================================
+  const healthIcons = {
+    'Vaccinatie': '💉',
+    'Ontwormen': '🐛',
+    'Vlooienbehandeling': '🦟',
+    'Dierenarts': '🏥',
+    'Medicatie': '💊',
+    'Anders': '📋'
+  };
+
+  async function loadHealth() {
+    const { data } = await sb.from('health_entries').select('*').order('recorded_at', { ascending: false });
+
+    if (!data?.length) {
+      document.getElementById('health-list').innerHTML = '<div class="empty-state"><div class="empty-icon">💉</div><p>Nog geen gezondheidsgegevens. Voeg vaccinaties of behandelingen toe!</p></div>';
+      return;
+    }
+
+    const now = new Date();
+    let html = '';
+    data.forEach(entry => {
+      const date = new Date(entry.recorded_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+      let dueHtml = '';
+      if (entry.next_due) {
+        const due = new Date(entry.next_due);
+        const dueDate = due.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+        const overdue = due < now;
+        dueHtml = `<div class="health-due ${overdue ? 'overdue' : ''}">
+          ${overdue ? '⚠️ Verlopen' : '📅 Volgende'}: ${dueDate}
+        </div>`;
+      }
+
+      html += `<div class="health-item">
+        <div class="health-icon">${healthIcons[entry.type] || '📋'}</div>
+        <div class="health-info">
+          <div class="health-type">${entry.type}</div>
+          ${entry.description ? `<div class="health-desc">${entry.description}</div>` : ''}
+          <div class="health-desc" style="margin-top:2px">Toegevoegd: ${date}</div>
+          ${dueHtml}
+        </div>
+        <button class="health-delete" onclick="deleteHealth('${entry.id}')">🗑️</button>
+      </div>`;
+    });
+
+    document.getElementById('health-list').innerHTML = html;
+  }
+
+  function openHealthModal() {
+    document.getElementById('health-desc').value = '';
+    document.getElementById('health-due').value = '';
+    document.getElementById('health-modal').classList.add('open');
+  }
+
+  async function saveHealth() {
+    const type = document.getElementById('health-type').value;
+    const desc = document.getElementById('health-desc').value.trim();
+    const due = document.getElementById('health-due').value;
+
+    await sb.from('health_entries').insert({
+      type,
+      description: desc,
+      next_due: due ? due + 'T12:00:00' : null,
+      recorded_at: new Date().toISOString()
+    });
+
+    closeModal('health-modal');
+    showToast('Opgeslagen! 💉');
+    loadHealth();
+  }
+
+  async function deleteHealth(id) {
+    if (!confirm('Verwijderen?')) return;
+    await sb.from('health_entries').delete().eq('id', id);
+    showToast('Verwijderd');
+    loadHealth();
+  }
+
+  // ============================================================
+  // HELPERS
+  // ============================================================
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  // Close modal on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>
