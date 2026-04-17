@@ -1133,12 +1133,17 @@
   async function handleLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
-    const btn = event.target;
+    const btn = document.querySelector('#login-form .btn-primary');
     btn.disabled = true; btn.textContent = 'Bezig...';
 
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) {
-      document.getElementById('auth-error').textContent = 'Inloggen mislukt. Controleer je gegevens.';
+    try {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        document.getElementById('auth-error').textContent = 'Inloggen mislukt: ' + error.message;
+        btn.disabled = false; btn.textContent = 'Inloggen';
+      }
+    } catch (e) {
+      document.getElementById('auth-error').textContent = 'Er ging iets mis. Probeer opnieuw.';
       btn.disabled = false; btn.textContent = 'Inloggen';
     }
   }
