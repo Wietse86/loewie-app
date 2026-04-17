@@ -1130,6 +1130,16 @@
     document.getElementById('auth-error').textContent = '';
   }
 
+  async function startSession(user) {
+    currentUser = user;
+    const { data: profile } = await sb.from('profiles').select('name').eq('id', user.id).single();
+    currentUserName = profile?.name || user.email.split('@')[0];
+    document.getElementById('user-avatar').textContent = currentUserName[0].toUpperCase();
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+  }
+
   async function handleLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
@@ -1137,10 +1147,12 @@
     btn.disabled = true; btn.textContent = 'Bezig...';
 
     try {
-      const { error } = await sb.auth.signInWithPassword({ email, password });
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
       if (error) {
         document.getElementById('auth-error').textContent = 'Inloggen mislukt: ' + error.message;
         btn.disabled = false; btn.textContent = 'Inloggen';
+      } else if (data?.user) {
+        await startSession(data.user);
       }
     } catch (e) {
       document.getElementById('auth-error').textContent = 'Er ging iets mis. Probeer opnieuw.';
@@ -1170,29 +1182,21 @@
 
     if (data.user) {
       await sb.from('profiles').upsert({ id: data.user.id, name });
+      await startSession(data.user);
     }
   }
 
   async function handleLogout() {
     await sb.auth.signOut();
+    currentUser = null;
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
   }
 
-  // ============================================================
-  // SESSION
-  // ============================================================
-  sb.auth.onAuthStateChange(async (event, session) => {
+  // Check existing session on page load
+  sb.auth.getSession().then(async ({ data: { session } }) => {
     if (session?.user) {
-      currentUser = session.user;
-      const { data: profile } = await sb.from('profiles').select('name').eq('id', currentUser.id).single();
-      currentUserName = profile?.name || currentUser.email.split('@')[0];
-      document.getElementById('user-avatar').textContent = currentUserName[0].toUpperCase();
-      document.getElementById('auth-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      initApp();
-    } else {
-      currentUser = null;
-      document.getElementById('auth-screen').style.display = 'flex';
-      document.getElementById('app').style.display = 'none';
+      await startSession(session.user);
     }
   });
 
