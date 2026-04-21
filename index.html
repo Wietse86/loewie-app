@@ -1651,13 +1651,16 @@
     const { data: settingData } = await sb.from('app_settings').select('value').eq('key', 'standaard_command_id').limit(1);
     const current = settingData?.[0]?.value || null;
 
+    // Verwijder altijd eerst alle bestaande rijen voor deze sleutel
+    await sb.from('app_settings').delete().eq('key', 'standaard_command_id');
+
     if (current === id) {
-      // Klik op dezelfde ster → zet standaard uit
-      await sb.from('app_settings').delete().eq('key', 'standaard_command_id');
+      // Zelfde ster aangeklikt → standaard uitgeschakeld
       showToast('Standaard verwijderd');
     } else {
-      // Stel nieuw standaard commando in (upsert = aanmaken of overschrijven)
-      await sb.from('app_settings').upsert({ key: 'standaard_command_id', value: id }, { onConflict: 'key' });
+      // Nieuw standaard commando instellen
+      const { error } = await sb.from('app_settings').insert({ key: 'standaard_command_id', value: id });
+      if (error) { showToast('Fout: ' + error.message); return; }
       showToast('Standaard ingesteld! ⭐');
     }
     await loadCommands();
