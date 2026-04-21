@@ -434,8 +434,8 @@
 
     /* Speciale kaart voor het standaard commando */
     .command-item.standaard {
-      background: #FFF6EF;
-      border: 1.5px solid var(--accent-light);
+      background: #FFF0E5;
+      border-left: 4px solid var(--accent);
     }
     .standaard-label {
       font-size: 0.65rem;
@@ -446,6 +446,10 @@
       display: block;
       margin-bottom: 1px;
     }
+
+    /* Ster actief: geel/goud gekleurd */
+    .command-star { color: var(--tan); }
+    .command-star.active { color: #F5C518; opacity: 1; transform: scale(1.2); filter: none; }
 
     .command-check { position: relative; pointer-events: none; }
 
@@ -1620,7 +1624,7 @@
       const isStandaard = cmd.id === standaardId;
       const score = bestScores[cmd.id] || 0;
 
-      html += `<div class="command-item ${practicedToday ? 'practiced-today' : ''} ${isStandaard ? 'standaard' : ''}" onclick="openScoreModal('${esc(cmd.id)}', ${JSON.stringify(cmd.name)})">
+      html += `<div class="command-item ${practicedToday ? 'practiced-today' : ''} ${isStandaard ? 'standaard' : ''}" onclick="openScoreModal('${esc(cmd.id)}', '${esc(cmd.name)}')">
         <div class="command-check ${practicedToday ? 'checked' : ''}">
           ${practicedToday ? '✓' : ''}
         </div>
@@ -2268,10 +2272,4 @@
     loadGrooming();
   }
 
-  // Registreer de service worker zodat de app installeerbaar is als PWA
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-  }
-</script>
-</body>
-</html>
+  // Registreer de ser
