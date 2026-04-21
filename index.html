@@ -6,6 +6,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Loewie" />
+  <meta name="theme-color" content="#D46B3B" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.svg" />
   <title>Loewie 🐾</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -401,6 +404,68 @@
 
     .command-delete:hover { opacity: 1; color: var(--red); }
 
+    /* Standaard / ster knop */
+    .command-star {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      opacity: 0.35;
+      transition: opacity 0.2s, transform 0.15s;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .command-star:hover { opacity: 0.7; transform: scale(1.15); }
+    .command-star.active { opacity: 1; }
+
+    /* Teller hoeveel keer vandaag geoefend */
+    .today-count {
+      display: inline-block;
+      background: var(--green);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 20px;
+      margin-left: 0.4rem;
+      vertical-align: middle;
+    }
+
+    /* Speciale kaart voor het standaard commando */
+    .command-item.standaard {
+      background: #FFF6EF;
+      border: 1.5px solid var(--accent-light);
+    }
+    .standaard-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: block;
+      margin-bottom: 1px;
+    }
+
+    /* Klik-hint op het vinkje als al geoefend */
+    .command-check.checked::after {
+      content: '+';
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      background: var(--accent);
+      color: white;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      font-size: 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    .command-check { position: relative; }
+
     /* SCORE MODAL */
     .score-options {
       display: flex;
@@ -467,6 +532,7 @@
     }
 
     .btn-add:hover { background: var(--brown); }
+    .btn-add:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .chart-container {
       position: relative;
@@ -701,6 +767,7 @@
     }
 
     .btn-confirm:hover { background: var(--brown); }
+    .btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
 
     /* TOAST */
     .toast {
@@ -770,9 +837,6 @@
 
     .fab:hover { background: var(--brown); transform: scale(1.05); }
 
-    /* HEALTH TYPE ICONS */
-    .health-type-select option { font-size: 1rem; }
-
     .section-label {
       font-size: 0.75rem;
       font-weight: 600;
@@ -782,7 +846,6 @@
       margin-bottom: 0.5rem;
     }
 
-    /* Responsive tweaks */
     @media (min-width: 480px) {
       .app-header { border-radius: 0; }
       .modal { border-radius: var(--radius); margin-bottom: 2rem; }
@@ -797,8 +860,8 @@
   <div class="auth-tagline">Jouw puppy trainingsapp</div>
   <div class="auth-card">
     <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('login')">Inloggen</button>
-      <button class="auth-tab" onclick="switchAuthTab('register')">Registreren</button>
+      <button class="auth-tab active" onclick="switchAuthTab('login', this)">Inloggen</button>
+      <button class="auth-tab" onclick="switchAuthTab('register', this)">Registreren</button>
     </div>
 
     <div id="login-form">
@@ -810,7 +873,7 @@
         <label>Wachtwoord</label>
         <input type="password" id="login-password" placeholder="••••••••" />
       </div>
-      <button class="btn-primary" onclick="handleLogin()">Inloggen</button>
+      <button class="btn-primary" onclick="handleLogin(this)">Inloggen</button>
     </div>
 
     <div id="register-form" style="display:none">
@@ -826,7 +889,7 @@
         <label>Wachtwoord</label>
         <input type="password" id="reg-password" placeholder="Min. 6 tekens" />
       </div>
-      <button class="btn-primary" onclick="handleRegister()">Account aanmaken</button>
+      <button class="btn-primary" onclick="handleRegister(this)">Account aanmaken</button>
     </div>
 
     <div id="auth-error" class="auth-error"></div>
@@ -915,7 +978,7 @@
       <div class="card-title">Nieuw gewicht invoeren</div>
       <div class="weight-input-row">
         <input type="number" class="input-field" id="weight-input" placeholder="bijv. 8.4" step="0.1" min="0" max="100" />
-        <button class="btn-add" onclick="saveWeight()">Opslaan</button>
+        <button class="btn-add" onclick="saveWeight(this)">Opslaan</button>
       </div>
       <div class="form-group">
         <input type="date" class="input-field" id="weight-date" />
@@ -959,7 +1022,7 @@
         </div>
       </div>
       <input type="text" class="input-field" id="feeding-notes" placeholder="Notitie (optioneel)" style="margin-bottom:0.75rem" />
-      <button class="btn-add" style="width:100%" onclick="saveFeeding()">Opslaan</button>
+      <button class="btn-add" style="width:100%" onclick="saveFeeding(this)">Opslaan</button>
     </div>
     <div class="card">
       <div class="card-title">Historie</div>
@@ -975,11 +1038,11 @@
       <textarea class="input-field" id="diary-text" placeholder="Hoe ging het vandaag met Loewie?"></textarea>
       <div class="file-upload">
         <label class="file-label" for="diary-photo-input">📷 Foto toevoegen</label>
-        <input type="file" id="diary-photo-input" accept="image/*" onchange="previewDiaryPhoto(this)" />
+        <input type="file" id="diary-photo-input" accept="image/*" onchange="previewPhoto(this, 'diary-photo-preview', 'diary-photo-name')" />
         <span id="diary-photo-name" style="font-size:0.8rem; color:var(--tan)"></span>
       </div>
       <img id="diary-photo-preview" style="display:none; width:100%; border-radius:8px; margin-bottom:0.75rem; max-height:150px; object-fit:cover" />
-      <button class="btn-add" style="width:100%" onclick="saveDiaryEntry()">Opslaan</button>
+      <button class="btn-add" style="width:100%" onclick="saveDiaryEntry(this)">Opslaan</button>
     </div>
     <div id="diary-list"><div class="loading">Laden...</div></div>
   </div>
@@ -1016,7 +1079,7 @@
     <textarea class="input-field" id="score-notes" placeholder="Notitie (optioneel)"></textarea>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('score-modal')">Annuleren</button>
-      <button class="btn-confirm" onclick="saveCommandSession()">Opslaan</button>
+      <button class="btn-confirm" onclick="saveCommandSession(this)">Opslaan</button>
     </div>
   </div>
 </div>
@@ -1035,7 +1098,7 @@
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('command-modal')">Annuleren</button>
-      <button class="btn-confirm" onclick="saveCommand()">Toevoegen</button>
+      <button class="btn-confirm" onclick="saveCommand(this)">Toevoegen</button>
     </div>
   </div>
 </div>
@@ -1058,13 +1121,13 @@
     </div>
     <div class="file-upload">
       <label class="file-label" for="milestone-photo-input">📷 Foto toevoegen</label>
-      <input type="file" id="milestone-photo-input" accept="image/*" onchange="previewMilestonePhoto(this)" />
+      <input type="file" id="milestone-photo-input" accept="image/*" onchange="previewPhoto(this, 'milestone-photo-preview', 'milestone-photo-name')" />
       <span id="milestone-photo-name" style="font-size:0.8rem; color:var(--tan)"></span>
     </div>
     <img id="milestone-photo-preview" style="display:none; width:100%; border-radius:8px; margin-bottom:0.75rem; max-height:150px; object-fit:cover" />
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('milestone-modal')">Annuleren</button>
-      <button class="btn-confirm" onclick="saveMilestone()">Opslaan</button>
+      <button class="btn-confirm" onclick="saveMilestone(this)">Opslaan</button>
     </div>
   </div>
 </div>
@@ -1094,7 +1157,7 @@
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('health-modal')">Annuleren</button>
-      <button class="btn-confirm" onclick="saveHealth()">Opslaan</button>
+      <button class="btn-confirm" onclick="saveHealth(this)">Opslaan</button>
     </div>
   </div>
 </div>
@@ -1120,11 +1183,35 @@
   let milestonePhotoFile = null;
 
   // ============================================================
+  // UTILS
+  // ============================================================
+
+  // Escapes user-supplied text before inserting into HTML to prevent XSS
+  function esc(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function todayRange() {
+    const today = new Date().toISOString().split('T')[0];
+    return { from: today + 'T00:00:00', to: today + 'T23:59:59' };
+  }
+
+  function setLoading(btn, loading, label) {
+    btn.disabled = loading;
+    btn.textContent = loading ? 'Bezig...' : label;
+  }
+
+  // ============================================================
   // AUTH
   // ============================================================
-  function switchAuthTab(tab) {
+  function switchAuthTab(tab, btn) {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-    event.target.classList.add('active');
+    btn.classList.add('active');
     document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
     document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
     document.getElementById('auth-error').textContent = '';
@@ -1140,43 +1227,41 @@
     initApp();
   }
 
-  async function handleLogin() {
+  async function handleLogin(btn) {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
-    const btn = document.querySelector('#login-form .btn-primary');
-    btn.disabled = true; btn.textContent = 'Bezig...';
+    setLoading(btn, true, 'Inloggen');
 
     try {
       const { data, error } = await sb.auth.signInWithPassword({ email, password });
       if (error) {
         document.getElementById('auth-error').textContent = 'Inloggen mislukt: ' + error.message;
-        btn.disabled = false; btn.textContent = 'Inloggen';
+        setLoading(btn, false, 'Inloggen');
       } else if (data?.user) {
         await startSession(data.user);
       }
-    } catch (e) {
+    } catch {
       document.getElementById('auth-error').textContent = 'Er ging iets mis. Probeer opnieuw.';
-      btn.disabled = false; btn.textContent = 'Inloggen';
+      setLoading(btn, false, 'Inloggen');
     }
   }
 
-  async function handleRegister() {
+  async function handleRegister(btn) {
     const name = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
     const password = document.getElementById('reg-password').value;
-    const btn = event.target;
 
     if (!name || !email || !password) {
       document.getElementById('auth-error').textContent = 'Vul alle velden in.';
       return;
     }
 
-    btn.disabled = true; btn.textContent = 'Bezig...';
+    setLoading(btn, true, 'Account aanmaken');
     const { data, error } = await sb.auth.signUp({ email, password });
 
     if (error) {
       document.getElementById('auth-error').textContent = error.message;
-      btn.disabled = false; btn.textContent = 'Account aanmaken';
+      setLoading(btn, false, 'Account aanmaken');
       return;
     }
 
@@ -1193,11 +1278,8 @@
     document.getElementById('app').style.display = 'none';
   }
 
-  // Check existing session on page load
   sb.auth.getSession().then(async ({ data: { session } }) => {
-    if (session?.user) {
-      await startSession(session.user);
-    }
+    if (session?.user) await startSession(session.user);
   });
 
   // ============================================================
@@ -1209,7 +1291,6 @@
     document.getElementById('page-' + name).classList.add('active');
     document.querySelector(`[data-page="${name}"]`).classList.add('active');
 
-    // Lazy load
     if (name === 'commands') loadCommands();
     if (name === 'weight') loadWeight();
     if (name === 'feeding') loadFeeding();
@@ -1238,66 +1319,72 @@
   function setDashboardGreeting() {
     const hour = new Date().getHours();
     const greet = hour < 12 ? 'Goedemorgen' : hour < 17 ? 'Goedemiddag' : 'Goedenavond';
-    document.getElementById('dashboard-greeting').textContent = `${greet}, ${currentUserName}! 👋`;
+    document.getElementById('dashboard-greeting').textContent = `${greet}, ${esc(currentUserName)}! 👋`;
   }
 
   // ============================================================
   // DASHBOARD
   // ============================================================
   async function loadDashboard() {
-    const today = new Date().toISOString().split('T')[0];
+    const { from, to } = todayRange();
 
-    // Commands today
-    const { data: sessions } = await sb.from('command_sessions')
-      .select('id')
-      .gte('practiced_at', today + 'T00:00:00')
-      .lte('practiced_at', today + 'T23:59:59');
+    // Run all stat queries in parallel
+    const [
+      { data: sessions },
+      { data: weights },
+      { count: mCount },
+      { count: dCount }
+    ] = await Promise.all([
+      sb.from('command_sessions').select('id').gte('practiced_at', from).lte('practiced_at', to),
+      sb.from('weight_entries').select('weight_kg').order('recorded_at', { ascending: false }).limit(1),
+      sb.from('milestones').select('id', { count: 'exact', head: true }),
+      sb.from('diary_entries').select('id', { count: 'exact', head: true })
+    ]);
+
     document.getElementById('stat-commands-today').textContent = sessions?.length || 0;
-
-    // Latest weight
-    const { data: weights } = await sb.from('weight_entries').select('weight_kg').order('recorded_at', { ascending: false }).limit(1);
     document.getElementById('stat-weight').textContent = weights?.[0]?.weight_kg || '–';
-
-    // Milestones count
-    const { count: mCount } = await sb.from('milestones').select('id', { count: 'exact', head: true });
     document.getElementById('stat-milestones').textContent = mCount || 0;
-
-    // Diary count
-    const { count: dCount } = await sb.from('diary_entries').select('id', { count: 'exact', head: true });
     document.getElementById('stat-diary').textContent = dCount || 0;
 
-    // Week bar
-    await loadWeekBar();
-
-    // Dashboard commands
-    await loadDashboardCommands();
+    await Promise.all([loadWeekBar(), loadDashboardCommands()]);
   }
 
   async function loadWeekBar() {
-    const days = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
     const now = new Date();
-    const dayOfWeek = now.getDay(); // 0=Sun
+    const dayOfWeek = now.getDay();
     const monday = new Date(now);
     monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    monday.setHours(0, 0, 0, 0);
 
-    let html = '';
-    let maxCount = 1;
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    // Single query for the whole week instead of 7 separate queries
+    const { data } = await sb.from('command_sessions')
+      .select('practiced_at')
+      .gte('practiced_at', monday.toISOString())
+      .lte('practiced_at', sunday.toISOString());
+
+    const countsByDate = {};
+    data?.forEach(s => {
+      const d = s.practiced_at.split('T')[0];
+      countsByDate[d] = (countsByDate[d] || 0) + 1;
+    });
+
+    const days = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
+    const todayStr = now.toISOString().split('T')[0];
     const counts = [];
 
     for (let i = 0; i < 7; i++) {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
       const dateStr = d.toISOString().split('T')[0];
-      const { data } = await sb.from('command_sessions')
-        .select('id')
-        .gte('practiced_at', dateStr + 'T00:00:00')
-        .lte('practiced_at', dateStr + 'T23:59:59');
-      const count = data?.length || 0;
-      counts.push({ count, dateStr, dayLabel: days[i] });
-      if (count > maxCount) maxCount = count;
+      counts.push({ count: countsByDate[dateStr] || 0, dateStr, dayLabel: days[i] });
     }
 
-    const todayStr = now.toISOString().split('T')[0];
+    const maxCount = Math.max(1, ...counts.map(c => c.count));
+    let html = '';
     counts.forEach(({ count, dateStr, dayLabel }) => {
       const height = Math.max(4, (count / maxCount) * 50);
       const isToday = dateStr === todayStr;
@@ -1317,21 +1404,39 @@
       return;
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    const { from, to } = todayRange();
     const { data: todaySessions } = await sb.from('command_sessions')
       .select('command_id')
-      .gte('practiced_at', today + 'T00:00:00');
-    const practicedIds = new Set(todaySessions?.map(s => s.command_id) || []);
+      .gte('practiced_at', from)
+      .lte('practiced_at', to);
+
+    const todayCount = {};
+    todaySessions?.forEach(s => {
+      todayCount[s.command_id] = (todayCount[s.command_id] || 0) + 1;
+    });
+
+    const standaardId = localStorage.getItem('loewieStandaard');
+    const sorted = [...commands].sort((a, b) => {
+      if (a.id === standaardId) return -1;
+      if (b.id === standaardId) return 1;
+      return 0;
+    });
 
     let html = '';
-    commands.slice(0, 5).forEach(cmd => {
-      const practiced = practicedIds.has(cmd.id);
-      html += `<div class="command-item ${practiced ? 'practiced-today' : ''}">
-        <div class="command-check ${practiced ? 'checked' : ''}" onclick="openScoreModal('${cmd.id}', '${cmd.name}')">
+    sorted.slice(0, 5).forEach(cmd => {
+      const count = todayCount[cmd.id] || 0;
+      const practiced = count > 0;
+      const isStandaard = cmd.id === standaardId;
+      html += `<div class="command-item ${practiced ? 'practiced-today' : ''} ${isStandaard ? 'standaard' : ''}">
+        <div class="command-check ${practiced ? 'checked' : ''}" onclick="openScoreModal('${esc(cmd.id)}', ${JSON.stringify(cmd.name)})">
           ${practiced ? '✓' : ''}
         </div>
         <div class="command-info">
-          <div class="command-name">${cmd.name}</div>
+          ${isStandaard ? '<span class="standaard-label">⭐ Standaard</span>' : ''}
+          <div class="command-name">
+            ${esc(cmd.name)}
+            ${count > 0 ? `<span class="today-count">${count}× vandaag</span>` : ''}
+          </div>
         </div>
       </div>`;
     });
@@ -1343,17 +1448,26 @@
   // COMMANDS
   // ============================================================
   async function loadCommands() {
-    const { data: commands } = await sb.from('commands').select('*').order('name');
-    const today = new Date().toISOString().split('T')[0];
-    const { data: todaySessions } = await sb.from('command_sessions')
-      .select('command_id, score')
-      .gte('practiced_at', today + 'T00:00:00');
+    const { from, to } = todayRange();
+    const standaardId = localStorage.getItem('loewieStandaard');
 
-    const sessionMap = {};
-    todaySessions?.forEach(s => { sessionMap[s.command_id] = s.score; });
+    const [
+      { data: commands },
+      { data: todaySessions },
+      { data: allSessions }
+    ] = await Promise.all([
+      sb.from('commands').select('*').order('name'),
+      sb.from('command_sessions').select('command_id, score').gte('practiced_at', from).lte('practiced_at', to),
+      sb.from('command_sessions').select('command_id, score')
+    ]);
 
-    // Get best scores
-    const { data: allSessions } = await sb.from('command_sessions').select('command_id, score');
+    // Tel hoeveel keer elk commando vandaag geoefend is
+    const todayCount = {};
+    todaySessions?.forEach(s => {
+      todayCount[s.command_id] = (todayCount[s.command_id] || 0) + 1;
+    });
+
+    // Hoogste score ooit per commando
     const bestScores = {};
     allSessions?.forEach(s => {
       if (!bestScores[s.command_id] || s.score > bestScores[s.command_id]) {
@@ -1370,25 +1484,56 @@
       return;
     }
 
+    // Standaard commando bovenaan
+    const sorted = [...commands].sort((a, b) => {
+      if (a.id === standaardId) return -1;
+      if (b.id === standaardId) return 1;
+      return 0;
+    });
+
     const scoreLabels = { 0: 'Niet geoefend', 1: 'Beginner', 2: 'Gaat wel', 3: 'Aardig', 4: 'Goed', 5: 'Beheerst!' };
     let html = '';
-    commands.forEach(cmd => {
-      const practicedToday = cmd.id in sessionMap;
+    sorted.forEach(cmd => {
+      const count = todayCount[cmd.id] || 0;
+      const practicedToday = count > 0;
+      const isStandaard = cmd.id === standaardId;
       const score = bestScores[cmd.id] || 0;
-      html += `<div class="command-item ${practicedToday ? 'practiced-today' : ''}">
-        <div class="command-check ${practicedToday ? 'checked' : ''}" onclick="openScoreModal('${cmd.id}', '${cmd.name}')">
+
+      html += `<div class="command-item ${practicedToday ? 'practiced-today' : ''} ${isStandaard ? 'standaard' : ''}">
+        <div class="command-check ${practicedToday ? 'checked' : ''}" onclick="openScoreModal('${esc(cmd.id)}', ${JSON.stringify(cmd.name)})" title="Klik om te oefenen">
           ${practicedToday ? '✓' : ''}
         </div>
         <div class="command-info">
-          <div class="command-name">${cmd.name}</div>
-          <div class="command-meta">${cmd.description || ''}</div>
+          ${isStandaard ? '<span class="standaard-label">⭐ Standaard</span>' : ''}
+          <div class="command-name">
+            ${esc(cmd.name)}
+            ${count > 0 ? `<span class="today-count">${count}× vandaag</span>` : ''}
+          </div>
+          <div class="command-meta">${esc(cmd.description)}</div>
         </div>
         <div class="score-badge score-${score}">${scoreLabels[score]}</div>
-        <button class="command-delete" onclick="deleteCommand('${cmd.id}')">🗑️</button>
+        <button class="command-star ${isStandaard ? 'active' : ''}" onclick="setStandaard('${esc(cmd.id)}')" title="${isStandaard ? 'Verwijder als standaard' : 'Stel in als standaard'}">
+          ${isStandaard ? '⭐' : '☆'}
+        </button>
+        <button class="command-delete" onclick="deleteCommand('${esc(cmd.id)}')">🗑️</button>
       </div>`;
     });
 
     document.getElementById('commands-list').innerHTML = html;
+  }
+
+  function setStandaard(id) {
+    const current = localStorage.getItem('loewieStandaard');
+    // Klik op dezelfde ster → zet standaard uit; anders → stel nieuwe in
+    if (current === id) {
+      localStorage.removeItem('loewieStandaard');
+      showToast('Standaard verwijderd');
+    } else {
+      localStorage.setItem('loewieStandaard', id);
+      showToast('Standaard ingesteld! ⭐');
+    }
+    loadCommands();
+    loadDashboard();
   }
 
   function openCommandModal() {
@@ -1397,11 +1542,14 @@
     document.getElementById('command-modal').classList.add('open');
   }
 
-  async function saveCommand() {
+  async function saveCommand(btn) {
     const name = document.getElementById('cmd-name').value.trim();
     if (!name) return;
     const desc = document.getElementById('cmd-desc').value.trim();
-    await sb.from('commands').insert({ name, description: desc });
+    setLoading(btn, true, 'Toevoegen');
+    const { error } = await sb.from('commands').insert({ name, description: desc });
+    setLoading(btn, false, 'Toevoegen');
+    if (error) { showToast('Fout bij opslaan'); return; }
     closeModal('command-modal');
     showToast('Commando toegevoegd! 🎯');
     loadCommands();
@@ -1431,16 +1579,19 @@
     });
   }
 
-  async function saveCommandSession() {
+  async function saveCommandSession(btn) {
     if (!selectedScore) { showToast('Kies een score!'); return; }
     const notes = document.getElementById('score-notes').value.trim();
-    await sb.from('command_sessions').insert({
+    setLoading(btn, true, 'Opslaan');
+    const { error } = await sb.from('command_sessions').insert({
       command_id: activeCommandId,
       user_id: currentUser.id,
       score: selectedScore,
       notes,
       practiced_at: new Date().toISOString()
     });
+    setLoading(btn, false, 'Opslaan');
+    if (error) { showToast('Fout bij opslaan'); return; }
     closeModal('score-modal');
     showToast('Goed bezig! 💪');
     loadCommands();
@@ -1466,10 +1617,11 @@
       const date = new Date(entry.recorded_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
       html += `<div class="weight-entry">
         <div>
-          <div class="weight-value">${entry.weight_kg} kg</div>
+          <div class="weight-value">${esc(String(entry.weight_kg))} kg</div>
           <div style="font-size:0.75rem;color:var(--tan)">${date}</div>
         </div>
-        ${entry.notes ? `<div style="font-size:0.8rem;color:#666">${entry.notes}</div>` : ''}
+        ${entry.notes ? `<div style="font-size:0.8rem;color:#666">${esc(entry.notes)}</div>` : ''}
+        <button class="command-delete" onclick="deleteWeight('${esc(entry.id)}')">🗑️</button>
       </div>`;
     });
     document.getElementById('weight-list').innerHTML = html;
@@ -1506,11 +1658,23 @@
     });
   }
 
-  async function saveWeight() {
+  async function deleteWeight(id) {
+    if (!confirm('Gewicht verwijderen?')) return;
+    await sb.from('weight_entries').delete().eq('id', id);
+    showToast('Verwijderd');
+    loadWeight();
+    loadDashboard();
+    loadFeeding();
+  }
+
+  async function saveWeight(btn) {
     const kg = parseFloat(document.getElementById('weight-input').value);
     const date = document.getElementById('weight-date').value;
     if (!kg || kg <= 0) { showToast('Voer een geldig gewicht in'); return; }
-    await sb.from('weight_entries').insert({ weight_kg: kg, recorded_at: date + 'T12:00:00' });
+    setLoading(btn, true, 'Opslaan');
+    const { error } = await sb.from('weight_entries').insert({ weight_kg: kg, recorded_at: date + 'T12:00:00' });
+    setLoading(btn, false, 'Opslaan');
+    if (error) { showToast('Fout bij opslaan'); return; }
     document.getElementById('weight-input').value = '';
     showToast('Gewicht opgeslagen! ⚖️');
     loadWeight();
@@ -1522,17 +1686,17 @@
   // FEEDING
   // ============================================================
   async function loadFeeding() {
-    // Get latest weight for advice
-    const { data: weights } = await sb.from('weight_entries').select('weight_kg').order('recorded_at', { ascending: false }).limit(1);
-    const weight = weights?.[0]?.weight_kg;
+    const [{ data: weights }, { data }] = await Promise.all([
+      sb.from('weight_entries').select('weight_kg').order('recorded_at', { ascending: false }).limit(1),
+      sb.from('feeding_entries').select('*').order('recorded_at', { ascending: false }).limit(20)
+    ]);
 
+    const weight = weights?.[0]?.weight_kg;
     if (weight) {
-      // Simple puppy feeding formula (approximate)
-      const dailyCalories = weight * 100; // rough estimate kcal/day for puppy
-      const wetGrams = Math.round(weight * 40); // ~40g natvoer per kg
-      const dryGrams = Math.round(weight * 20); // ~20g brokken per kg
+      const wetGrams = Math.round(weight * 40);
+      const dryGrams = Math.round(weight * 20);
       document.getElementById('feeding-advice').innerHTML = `
-        <p style="font-size:0.85rem;color:var(--tan);margin-bottom:0.75rem">Op basis van ${weight} kg lichaamsgewicht:</p>
+        <p style="font-size:0.85rem;color:var(--tan);margin-bottom:0.75rem">Op basis van ${esc(String(weight))} kg lichaamsgewicht:</p>
         <div class="feeding-grid">
           <div class="feeding-block">
             <div class="feeding-amount">${wetGrams}g</div>
@@ -1548,9 +1712,6 @@
         <p style="font-size:0.75rem;color:var(--tan);margin-top:0.5rem">💡 Dit is een richtlijn. Raadpleeg je dierenarts voor persoonlijk advies.</p>`;
     }
 
-    // Load history
-    const { data } = await sb.from('feeding_entries').select('*').order('recorded_at', { ascending: false }).limit(20);
-
     if (!data?.length) {
       document.getElementById('feeding-list').innerHTML = '<div class="empty-state"><div class="empty-icon">🍽️</div><p>Nog geen voeding ingevoerd</p></div>';
       return;
@@ -1562,18 +1723,26 @@
       html += `<div class="weight-entry">
         <div>
           <div style="font-weight:600;font-size:0.9rem">${date}</div>
-          ${entry.notes ? `<div style="font-size:0.75rem;color:var(--tan)">${entry.notes}</div>` : ''}
+          ${entry.notes ? `<div style="font-size:0.75rem;color:var(--tan)">${esc(entry.notes)}</div>` : ''}
         </div>
         <div style="text-align:right;font-size:0.85rem">
           ${entry.wet_food_grams ? `<div>🥫 ${entry.wet_food_grams}g</div>` : ''}
           ${entry.dry_food_grams ? `<div>🥣 ${entry.dry_food_grams}g</div>` : ''}
         </div>
+        <button class="command-delete" onclick="deleteFeeding('${esc(entry.id)}')">🗑️</button>
       </div>`;
     });
     document.getElementById('feeding-list').innerHTML = html;
   }
 
-  async function saveFeeding() {
+  async function deleteFeeding(id) {
+    if (!confirm('Voeding verwijderen?')) return;
+    await sb.from('feeding_entries').delete().eq('id', id);
+    showToast('Verwijderd');
+    loadFeeding();
+  }
+
+  async function saveFeeding(btn) {
     const wet = parseFloat(document.getElementById('feeding-wet').value) || null;
     const dry = parseFloat(document.getElementById('feeding-dry').value) || null;
     const date = document.getElementById('feeding-date').value;
@@ -1581,12 +1750,15 @@
 
     if (!wet && !dry) { showToast('Vul minimaal één hoeveelheid in'); return; }
 
-    await sb.from('feeding_entries').insert({
+    setLoading(btn, true, 'Opslaan');
+    const { error } = await sb.from('feeding_entries').insert({
       wet_food_grams: wet,
       dry_food_grams: dry,
       recorded_at: date + 'T12:00:00',
       notes
     });
+    setLoading(btn, false, 'Opslaan');
+    if (error) { showToast('Fout bij opslaan'); return; }
 
     document.getElementById('feeding-wet').value = '';
     document.getElementById('feeding-dry').value = '';
@@ -1611,58 +1783,74 @@
     let html = '';
     data.forEach(entry => {
       const date = new Date(entry.recorded_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
-      const author = entry.profiles?.name || 'Onbekend';
+      const author = esc(entry.profiles?.name || 'Onbekend');
       html += `<div class="diary-entry">
         <div class="diary-header">
           <div class="diary-date">${date}</div>
           <div class="diary-author">${author}</div>
+          <button class="command-delete" onclick="deleteDiary('${esc(entry.id)}')">🗑️</button>
         </div>
-        <div class="diary-text">${entry.content}</div>
-        ${entry.photo_url ? `<img class="diary-photo" src="${entry.photo_url}" alt="Foto" />` : ''}
+        <div class="diary-text">${esc(entry.content)}</div>
+        ${entry.photo_url ? `<img class="diary-photo" src="${esc(entry.photo_url)}" alt="Foto" />` : ''}
       </div>`;
     });
     document.getElementById('diary-list').innerHTML = html;
   }
 
-  function previewDiaryPhoto(input) {
-    diaryPhotoFile = input.files[0];
-    if (diaryPhotoFile) {
-      document.getElementById('diary-photo-name').textContent = diaryPhotoFile.name;
-      const reader = new FileReader();
-      reader.onload = e => {
-        const preview = document.getElementById('diary-photo-preview');
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-      };
-      reader.readAsDataURL(diaryPhotoFile);
-    }
+  async function deleteDiary(id) {
+    if (!confirm('Notitie verwijderen?')) return;
+    await sb.from('diary_entries').delete().eq('id', id);
+    showToast('Verwijderd');
+    loadDiary();
+    loadDashboard();
   }
 
-  async function saveDiaryEntry() {
+  function previewPhoto(input, previewId, nameId) {
+    const file = input.files[0];
+    if (!file) return;
+
+    // Store on the right variable based on which input triggered this
+    if (input.id === 'diary-photo-input') diaryPhotoFile = file;
+    if (input.id === 'milestone-photo-input') milestonePhotoFile = file;
+
+    document.getElementById(nameId).textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const preview = document.getElementById(previewId);
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function uploadPhoto(file, folder) {
+    const fileName = `${folder}/${currentUser.id}/${Date.now()}_${file.name}`;
+    const { error } = await sb.storage.from('photos').upload(fileName, file);
+    if (error) return null;
+    const { data } = sb.storage.from('photos').getPublicUrl(fileName);
+    return data.publicUrl;
+  }
+
+  async function saveDiaryEntry(btn) {
     const content = document.getElementById('diary-text').value.trim();
     if (!content) { showToast('Schrijf eerst iets!'); return; }
 
-    let photoUrl = null;
+    setLoading(btn, true, 'Opslaan');
+    const photoUrl = diaryPhotoFile ? await uploadPhoto(diaryPhotoFile, 'diary') : null;
 
-    if (diaryPhotoFile) {
-      const fileName = `diary/${currentUser.id}/${Date.now()}_${diaryPhotoFile.name}`;
-      const { data: uploadData, error } = await sb.storage.from('photos').upload(fileName, diaryPhotoFile);
-      if (!error) {
-        const { data: urlData } = sb.storage.from('photos').getPublicUrl(fileName);
-        photoUrl = urlData.publicUrl;
-      }
-    }
-
-    await sb.from('diary_entries').insert({
+    const { error } = await sb.from('diary_entries').insert({
       user_id: currentUser.id,
       content,
       photo_url: photoUrl,
       recorded_at: new Date().toISOString()
     });
+    setLoading(btn, false, 'Opslaan');
+    if (error) { showToast('Fout bij opslaan'); return; }
 
     document.getElementById('diary-text').value = '';
     document.getElementById('diary-photo-name').textContent = '';
     document.getElementById('diary-photo-preview').style.display = 'none';
+    document.getElementById('diary-photo-input').value = '';
     diaryPhotoFile = null;
     showToast('Notitie opgeslagen! 📔');
     loadDiary();
@@ -1687,11 +1875,11 @@
       html += `<div class="milestone-item">
         <div class="milestone-dot"></div>
         <div class="milestone-content">
-          <div class="milestone-title">${m.title}</div>
-          <div class="milestone-date">${date} · ${m.profiles?.name || ''}</div>
-          ${m.description ? `<div class="milestone-desc">${m.description}</div>` : ''}
+          <div class="milestone-title">${esc(m.title)}</div>
+          <div class="milestone-date">${date} · ${esc(m.profiles?.name || '')}</div>
+          ${m.description ? `<div class="milestone-desc">${esc(m.description)}</div>` : ''}
         </div>
-        ${m.photo_url ? `<img class="milestone-photo" src="${m.photo_url}" alt="Foto" />` : ''}
+        ${m.photo_url ? `<img class="milestone-photo" src="${esc(m.photo_url)}" alt="Foto" />` : ''}
       </div>`;
     });
     html += '</div>';
@@ -1704,47 +1892,29 @@
     document.getElementById('milestone-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('milestone-photo-preview').style.display = 'none';
     document.getElementById('milestone-photo-name').textContent = '';
+    document.getElementById('milestone-photo-input').value = '';
     milestonePhotoFile = null;
     document.getElementById('milestone-modal').classList.add('open');
   }
 
-  function previewMilestonePhoto(input) {
-    milestonePhotoFile = input.files[0];
-    if (milestonePhotoFile) {
-      document.getElementById('milestone-photo-name').textContent = milestonePhotoFile.name;
-      const reader = new FileReader();
-      reader.onload = e => {
-        const preview = document.getElementById('milestone-photo-preview');
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-      };
-      reader.readAsDataURL(milestonePhotoFile);
-    }
-  }
-
-  async function saveMilestone() {
+  async function saveMilestone(btn) {
     const title = document.getElementById('milestone-title').value.trim();
     const desc = document.getElementById('milestone-desc').value.trim();
     const date = document.getElementById('milestone-date').value;
     if (!title) { showToast('Voer een titel in'); return; }
 
-    let photoUrl = null;
-    if (milestonePhotoFile) {
-      const fileName = `milestones/${currentUser.id}/${Date.now()}_${milestonePhotoFile.name}`;
-      const { error } = await sb.storage.from('photos').upload(fileName, milestonePhotoFile);
-      if (!error) {
-        const { data: urlData } = sb.storage.from('photos').getPublicUrl(fileName);
-        photoUrl = urlData.publicUrl;
-      }
-    }
+    setLoading(btn, true, 'Opslaan');
+    const photoUrl = milestonePhotoFile ? await uploadPhoto(milestonePhotoFile, 'milestones') : null;
 
-    await sb.from('milestones').insert({
+    const { error } = await sb.from('milestones').insert({
       user_id: currentUser.id,
       title,
       description: desc,
       photo_url: photoUrl,
       achieved_at: date + 'T12:00:00'
     });
+    setLoading(btn, false, 'Opslaan');
+    if (error) { showToast('Fout bij opslaan'); return; }
 
     closeModal('milestone-modal');
     showToast('Mijlpaal opgeslagen! 🏆');
@@ -1789,12 +1959,12 @@
       html += `<div class="health-item">
         <div class="health-icon">${healthIcons[entry.type] || '📋'}</div>
         <div class="health-info">
-          <div class="health-type">${entry.type}</div>
-          ${entry.description ? `<div class="health-desc">${entry.description}</div>` : ''}
+          <div class="health-type">${esc(entry.type)}</div>
+          ${entry.description ? `<div class="health-desc">${esc(entry.description)}</div>` : ''}
           <div class="health-desc" style="margin-top:2px">Toegevoegd: ${date}</div>
           ${dueHtml}
         </div>
-        <button class="health-delete" onclick="deleteHealth('${entry.id}')">🗑️</button>
+        <button class="health-delete" onclick="deleteHealth('${esc(entry.id)}')">🗑️</button>
       </div>`;
     });
 
@@ -1807,17 +1977,20 @@
     document.getElementById('health-modal').classList.add('open');
   }
 
-  async function saveHealth() {
+  async function saveHealth(btn) {
     const type = document.getElementById('health-type').value;
     const desc = document.getElementById('health-desc').value.trim();
     const due = document.getElementById('health-due').value;
 
-    await sb.from('health_entries').insert({
+    setLoading(btn, true, 'Opslaan');
+    const { error } = await sb.from('health_entries').insert({
       type,
       description: desc,
       next_due: due ? due + 'T12:00:00' : null,
       recorded_at: new Date().toISOString()
     });
+    setLoading(btn, false, 'Opslaan');
+    if (error) { showToast('Fout bij opslaan'); return; }
 
     closeModal('health-modal');
     showToast('Opgeslagen! 💉');
@@ -1838,7 +2011,6 @@
     document.getElementById(id).classList.remove('open');
   }
 
-  // Close modal on overlay click
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', e => {
       if (e.target === overlay) overlay.classList.remove('open');
@@ -1850,6 +2022,11 @@
     toast.textContent = msg;
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  // Registreer de service worker zodat de app installeerbaar is als PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
   }
 </script>
 </body>
