@@ -1,0 +1,17 @@
+{
+  "name": "Loewie 🐾",
+  "short_name": "Loewie",
+  "description": "Jouw puppy trainingsapp",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF7F2",
+  "theme_color": "#D46B3B",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

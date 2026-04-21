@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Achtergrond -->
+  <rect width="512" height="512" rx="110" fill="#FAF7F2"/>
+
+  <!-- Oren (links en rechts, breed en flapperig) -->
+  <ellipse cx="130" cy="230" rx="72" ry="95" fill="#7D4A1E" transform="rotate(-10 130 230)"/>
+  <ellipse cx="382" cy="230" rx="72" ry="95" fill="#7D4A1E" transform="rotate(10 382 230)"/>
+  <!-- Binnenoor schaduw -->
+  <ellipse cx="133" cy="238" rx="45" ry="68" fill="#5C3210" transform="rotate(-10 133 238)"/>
+  <ellipse cx="379" cy="238" rx="45" ry="68" fill="#5C3210" transform="rotate(10 379 238)"/>
+
+  <!-- Hoofd / gezicht -->
+  <ellipse cx="256" cy="265" rx="148" ry="145" fill="#A0581A"/>
+
+  <!-- Krullend vacht textuur hoofd — donkere krul-strepen -->
+  <path d="M150 200 q10-18 22 0 q10-18 22 0" stroke="#7D4A1E" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M185 175 q10-18 22 0 q10-18 22 0" stroke="#7D4A1E" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M225 162 q10-18 22 0 q10-18 22 0" stroke="#7D4A1E" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M268 160 q10-18 22 0 q10-18 22 0" stroke="#7D4A1E" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M308 168 q10-18 22 0 q10-18 22 0" stroke="#7D4A1E" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M340 188 q10-18 22 0 q10-18 22 0" stroke="#7D4A1E" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M155 240 q10-16 20 0 q10-16 20 0" stroke="#7D4A1E" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M340 235 q10-16 20 0 q10-16 20 0" stroke="#7D4A1E" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+  <!-- Wenkbrauw-bogen (lichte vacht erboven) -->
+  <ellipse cx="210" cy="242" rx="32" ry="20" fill="#C4782A" opacity="0.6"/>
+  <ellipse cx="302" cy="242" rx="32" ry="20" fill="#C4782A" opacity="0.6"/>
+
+  <!-- Ogen -->
+  <ellipse cx="210" cy="262" rx="28" ry="28" fill="#1A0D05"/>
+  <ellipse cx="302" cy="262" rx="28" ry="28" fill="#1A0D05"/>
+  <!-- Oogglans -->
+  <circle cx="220" cy="252" r="8" fill="white"/>
+  <circle cx="312" cy="252" r="8" fill="white"/>
+  <circle cx="224" cy="256" r="4" fill="white" opacity="0.6"/>
+  <circle cx="316" cy="256" r="4" fill="white" opacity="0.6"/>
+
+  <!-- Neus -->
+  <ellipse cx="256" cy="318" rx="30" ry="22" fill="#1A0D05"/>
+  <ellipse cx="248" cy="312" rx="9" ry="6" fill="#3D2010" opacity="0.5"/>
+
+  <!-- Mond -->
+  <path d="M236 338 q20 18 40 0" stroke="#1A0D05" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M236 338 q-8 6-12 4" stroke="#1A0D05" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M276 338 q8 6 12 4" stroke="#1A0D05" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+  <!-- Krulletjes op het voorhoofd -->
+  <path d="M230 195 q8-20 18-2" stroke="#5C3210" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M252 185 q8-20 18-2" stroke="#5C3210" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M275 190 q8-20 18-2" stroke="#5C3210" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+  <!-- Lichte vacht midden borst/kin -->
+  <ellipse cx="256" cy="385" rx="48" ry="30" fill="#C4882A" opacity="0.5"/>
+
+  <!-- Schets-rand rondom het icoon -->
+  <rect width="512" height="512" rx="110" fill="none" stroke="#7D5A3C" stroke-width="14"/>
+</svg>
