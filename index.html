@@ -447,24 +447,7 @@
       margin-bottom: 1px;
     }
 
-    /* Klik-hint op het vinkje als al geoefend */
-    .command-check.checked::after {
-      content: '+';
-      position: absolute;
-      bottom: -4px;
-      right: -4px;
-      background: var(--accent);
-      color: white;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      font-size: 0.65rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-    }
-    .command-check { position: relative; }
+    .command-check { position: relative; pointer-events: none; }
 
     /* SCORE MODAL */
     .score-options {
@@ -846,6 +829,85 @@
       margin-bottom: 0.5rem;
     }
 
+    /* Dashboard commando lijst (zonder rondje) */
+    .dash-cmd-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 0.75rem;
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .dash-cmd-row:active { background: var(--sand); }
+    .dash-cmd-row.practiced { background: #EBF5EE; }
+    .dash-cmd-name { font-weight: 600; font-size: 0.95rem; }
+
+    /* Ster actief: duidelijker zichtbaar */
+    .command-star.active {
+      opacity: 1;
+      filter: drop-shadow(0 0 3px rgba(212,107,59,0.6));
+      transform: scale(1.15);
+    }
+
+    /* Heel commando-item klikbaar voor oefenen */
+    .command-item { cursor: pointer; }
+    .command-item:active { opacity: 0.85; }
+
+    /* Voeding: invoer velden onder elkaar op mobiel */
+    .feeding-input-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Laatste voeding kaart */
+    .last-feeding {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .last-feeding-block {
+      flex: 1;
+      text-align: center;
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+    }
+    .last-feeding-val {
+      font-family: 'Fraunces', serif;
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+    .last-feeding-lbl { font-size: 0.75rem; color: var(--tan); margin-top: 2px; }
+
+    /* VERZORGING */
+    .groom-status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+    .groom-status-card {
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 0.5rem;
+      text-align: center;
+    }
+    .groom-icon { font-size: 1.4rem; }
+    .groom-days {
+      font-family: 'Fraunces', serif;
+      font-size: 1.4rem;
+      color: var(--accent);
+      line-height: 1.1;
+      margin-top: 0.25rem;
+    }
+    .groom-days.urgent { color: var(--red); }
+    .groom-label { font-size: 0.65rem; color: var(--tan); font-weight: 600; margin-top: 2px; }
+
     @media (min-width: 480px) {
       .app-header { border-radius: 0; }
       .modal { border-radius: var(--radius); margin-bottom: 2rem; }
@@ -928,6 +990,9 @@
       <button class="nav-tab" onclick="showPage('health')" data-page="health">
         <span class="tab-icon">💉</span>Gezondheid
       </button>
+      <button class="nav-tab" onclick="showPage('grooming')" data-page="grooming">
+        <span class="tab-icon">✂️</span>Verzorging
+      </button>
     </nav>
   </div>
 
@@ -959,7 +1024,7 @@
     </div>
 
     <div class="card" id="dashboard-commands-card">
-      <div class="card-title">Vandaag oefenen</div>
+      <div class="card-title">Vandaag geoefend</div>
       <div id="dashboard-commands-list"><div class="loading">Laden...</div></div>
     </div>
   </div>
@@ -981,7 +1046,7 @@
         <button class="btn-add" onclick="saveWeight(this)">Opslaan</button>
       </div>
       <div class="form-group">
-        <input type="date" class="input-field" id="weight-date" />
+        <input type="date" class="input-field" id="weight-date" style="width:100%" />
       </div>
     </div>
     <div class="card">
@@ -1000,6 +1065,10 @@
   <div class="page" id="page-feeding">
     <p class="page-title">Voeding 🍽️</p>
     <div class="card">
+      <div class="card-title">Laatste invoer</div>
+      <div id="feeding-latest"><p style="color:var(--tan);font-size:0.9rem">Nog geen voeding ingevoerd.</p></div>
+    </div>
+    <div class="card">
       <div class="card-title">Advies op basis van gewicht</div>
       <div id="feeding-advice">
         <p style="color:var(--tan); font-size:0.9rem;">Voer eerst een gewicht in om voedingsadvies te zien.</p>
@@ -1011,7 +1080,7 @@
         <label>Datum</label>
         <input type="date" class="input-field" id="feeding-date" />
       </div>
-      <div class="feeding-grid">
+      <div class="feeding-input-grid">
         <div>
           <div class="section-label">Natvoer (gram)</div>
           <input type="number" class="input-field" id="feeding-wet" placeholder="bijv. 150" />
@@ -1059,6 +1128,22 @@
     <p class="page-title">Gezondheid 💉</p>
     <div id="health-list"><div class="loading">Laden...</div></div>
     <button class="fab" onclick="openHealthModal()">+</button>
+  </div>
+
+  <!-- GROOMING -->
+  <div class="page" id="page-grooming">
+    <p class="page-title">Verzorging ✂️</p>
+    <div class="card">
+      <div class="card-title">Status</div>
+      <div class="groom-status-grid" id="groom-status">
+        <div class="loading">Laden...</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Historie</div>
+      <div id="grooming-list"><div class="loading">Laden...</div></div>
+    </div>
+    <button class="fab" onclick="openGroomingModal()">+</button>
   </div>
 </div>
 
@@ -1158,6 +1243,37 @@
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('health-modal')">Annuleren</button>
       <button class="btn-confirm" onclick="saveHealth(this)">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Grooming Modal -->
+<div class="modal-overlay" id="grooming-modal">
+  <div class="modal">
+    <div class="modal-title">Verzorging toevoegen ✂️</div>
+    <div class="form-group">
+      <label>Type</label>
+      <select class="input-field" id="groom-type" style="width:100%" onchange="toggleGroomTrimmer()">
+        <option value="tanden">🦷 Tanden gepoetst</option>
+        <option value="borstelen">🪮 Geborsteld</option>
+        <option value="trimmer">✂️ Naar de trimmer geweest</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Datum</label>
+      <input type="date" class="input-field" id="groom-date" style="width:100%" />
+    </div>
+    <div class="form-group" id="groom-next-group" style="display:none">
+      <label>Volgende trimmer afspraak (optioneel)</label>
+      <input type="date" class="input-field" id="groom-next" style="width:100%" />
+    </div>
+    <div class="form-group">
+      <label>Notitie (optioneel)</label>
+      <input type="text" class="input-field" id="groom-notes" placeholder="bijv. Ging goed!" style="width:100%" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('grooming-modal')">Annuleren</button>
+      <button class="btn-confirm" onclick="saveGrooming(this)">Opslaan</button>
     </div>
   </div>
 </div>
@@ -1297,6 +1413,7 @@
     if (name === 'diary') loadDiary();
     if (name === 'milestones') loadMilestones();
     if (name === 'health') loadHealth();
+    if (name === 'grooming') loadGrooming();
   }
 
   // ============================================================
@@ -1310,7 +1427,7 @@
 
   function setDefaultDates() {
     const today = new Date().toISOString().split('T')[0];
-    ['weight-date', 'feeding-date', 'milestone-date'].forEach(id => {
+    ['weight-date', 'feeding-date', 'milestone-date', 'groom-date'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = today;
     });
@@ -1424,24 +1541,23 @@
       return 0;
     });
 
-    let html = '';
-    sorted.slice(0, 5).forEach(cmd => {
-      const count = todayCount[cmd.id] || 0;
-      const practiced = count > 0;
-      const isStandaard = cmd.id === standaardId;
-      html += `<div class="command-item ${practiced ? 'practiced-today' : ''} ${isStandaard ? 'standaard' : ''}">
-        <div class="command-check ${practiced ? 'checked' : ''}" onclick="openScoreModal('${esc(cmd.id)}', ${JSON.stringify(cmd.name)})">
-          ${practiced ? '✓' : ''}
-        </div>
-        <div class="command-info">
-          ${isStandaard ? '<span class="standaard-label">⭐ Standaard</span>' : ''}
-          <div class="command-name">
-            ${esc(cmd.name)}
-            ${count > 0 ? `<span class="today-count">${count}× vandaag</span>` : ''}
-          </div>
-        </div>
+    // Alleen commando's tonen die vandaag geoefend zijn
+    const practicedCmds = sorted.filter(cmd => (todayCount[cmd.id] || 0) > 0);
+
+    if (!practicedCmds.length) {
+      document.getElementById('dashboard-commands-list').innerHTML =
+        '<p style="color:var(--tan);font-size:0.9rem">Nog niets geoefend vandaag. Ga naar Commando\'s om te beginnen!</p>';
+      return;
+    }
+
+    let html = '<div style="display:flex;flex-wrap:wrap;gap:0.5rem">';
+    practicedCmds.forEach(cmd => {
+      const count = todayCount[cmd.id];
+      html += `<div style="background:var(--green);color:white;border-radius:20px;padding:0.35rem 0.75rem;font-size:0.85rem;font-weight:600">
+        ${esc(cmd.name)} <span style="opacity:0.85">${count}×</span>
       </div>`;
     });
+    html += '</div>';
 
     document.getElementById('dashboard-commands-list').innerHTML = html;
   }
@@ -1504,8 +1620,8 @@
       const isStandaard = cmd.id === standaardId;
       const score = bestScores[cmd.id] || 0;
 
-      html += `<div class="command-item ${practicedToday ? 'practiced-today' : ''} ${isStandaard ? 'standaard' : ''}">
-        <div class="command-check ${practicedToday ? 'checked' : ''}" onclick="openScoreModal('${esc(cmd.id)}', ${JSON.stringify(cmd.name)})" title="Klik om te oefenen">
+      html += `<div class="command-item ${practicedToday ? 'practiced-today' : ''} ${isStandaard ? 'standaard' : ''}" onclick="openScoreModal('${esc(cmd.id)}', ${JSON.stringify(cmd.name)})">
+        <div class="command-check ${practicedToday ? 'checked' : ''}">
           ${practicedToday ? '✓' : ''}
         </div>
         <div class="command-info">
@@ -1517,10 +1633,10 @@
           <div class="command-meta">${esc(cmd.description)}</div>
         </div>
         <div class="score-badge score-${score}">${scoreLabels[score]}</div>
-        <button class="command-star ${isStandaard ? 'active' : ''}" onclick="setStandaard('${esc(cmd.id)}')" title="${isStandaard ? 'Verwijder als standaard' : 'Stel in als standaard'}">
+        <button class="command-star ${isStandaard ? 'active' : ''}" onclick="event.stopPropagation(); setStandaard('${esc(cmd.id)}')" title="${isStandaard ? 'Verwijder als standaard' : 'Stel in als standaard'}">
           ${isStandaard ? '⭐' : '☆'}
         </button>
-        <button class="command-delete" onclick="deleteCommand('${esc(cmd.id)}')">🗑️</button>
+        <button class="command-delete" onclick="event.stopPropagation(); deleteCommand('${esc(cmd.id)}')">🗑️</button>
       </div>`;
     });
 
@@ -1540,7 +1656,7 @@
       await sb.from('app_settings').upsert({ key: 'standaard_command_id', value: id });
       showToast('Standaard ingesteld! ⭐');
     }
-    loadCommands();
+    await loadCommands();
     loadDashboard();
   }
 
@@ -1718,6 +1834,19 @@
           </div>
         </div>
         <p style="font-size:0.75rem;color:var(--tan);margin-top:0.5rem">💡 Dit is een richtlijn. Raadpleeg je dierenarts voor persoonlijk advies.</p>`;
+    }
+
+    // Laatste invoer bovenaan
+    if (data?.[0]) {
+      const last = data[0];
+      const lastDate = new Date(last.recorded_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
+      document.getElementById('feeding-latest').innerHTML = `
+        <p style="font-size:0.8rem;color:var(--tan);margin-bottom:0.6rem">${lastDate}</p>
+        <div class="last-feeding">
+          ${last.wet_food_grams ? `<div class="last-feeding-block"><div class="last-feeding-val">${last.wet_food_grams}g</div><div class="last-feeding-lbl">🥫 Natvoer</div></div>` : ''}
+          ${last.dry_food_grams ? `<div class="last-feeding-block"><div class="last-feeding-val">${last.dry_food_grams}g</div><div class="last-feeding-lbl">🥣 Brokken</div></div>` : ''}
+        </div>
+        ${last.notes ? `<p style="font-size:0.8rem;color:var(--tan);margin-top:0.5rem">${esc(last.notes)}</p>` : ''}`;
     }
 
     if (!data?.length) {
@@ -1917,12 +2046,12 @@
     const { error } = await sb.from('milestones').insert({
       user_id: currentUser.id,
       title,
-      description: desc,
+      description: desc || null,
       photo_url: photoUrl,
-      achieved_at: date + 'T12:00:00'
+      achieved_at: date
     });
     setLoading(btn, false, 'Opslaan');
-    if (error) { showToast('Fout bij opslaan'); return; }
+    if (error) { showToast('Fout: ' + error.message); return; }
 
     closeModal('milestone-modal');
     showToast('Mijlpaal opgeslagen! 🏆');
@@ -2030,6 +2159,113 @@
     toast.textContent = msg;
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  // ============================================================
+  // VERZORGING
+  // ============================================================
+  const groomTypes = {
+    tanden:   { label: 'Tanden',   icon: '🦷', urgentDays: 2 },
+    borstelen: { label: 'Borstelen', icon: '🪮', urgentDays: 3 },
+    trimmer:  { label: 'Trimmer',  icon: '✂️', urgentDays: 42 }
+  };
+
+  async function loadGrooming() {
+    const { data } = await sb.from('grooming_entries')
+      .select('*')
+      .order('recorded_at', { ascending: false });
+
+    // Status kaarten: laatste datum per type
+    const lastByType = {};
+    const nextTrimmer = data?.find(e => e.type === 'trimmer' && e.next_appointment)?.next_appointment || null;
+    data?.forEach(e => { if (!lastByType[e.type]) lastByType[e.type] = e.recorded_at; });
+
+    const now = new Date();
+    let statusHtml = '';
+    Object.entries(groomTypes).forEach(([key, cfg]) => {
+      const last = lastByType[key];
+      const days = last ? Math.floor((now - new Date(last)) / 86400000) : null;
+      const urgent = days === null || days >= cfg.urgentDays;
+      statusHtml += `<div class="groom-status-card">
+        <div class="groom-icon">${cfg.icon}</div>
+        <div class="groom-days ${urgent ? 'urgent' : ''}">${days === null ? '–' : days + 'd'}</div>
+        <div class="groom-label">${cfg.label}</div>
+      </div>`;
+    });
+    document.getElementById('groom-status').innerHTML = statusHtml;
+
+    // Volgende trimmer afspraak
+    if (nextTrimmer) {
+      const nextDate = new Date(nextTrimmer).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+      const overdue = new Date(nextTrimmer) < now;
+      statusHtml += `<div style="grid-column:1/-1;font-size:0.8rem;color:${overdue ? 'var(--red)' : 'var(--accent)'};margin-top:0.25rem">
+        ${overdue ? '⚠️ Trimmer verlopen' : '📅 Volgende trimmer'}: ${nextDate}
+      </div>`;
+      document.getElementById('groom-status').innerHTML = statusHtml;
+    }
+
+    if (!data?.length) {
+      document.getElementById('grooming-list').innerHTML = '<div class="empty-state"><div class="empty-icon">✂️</div><p>Nog niets gelogd. Tik op + om te beginnen!</p></div>';
+      return;
+    }
+
+    let html = '';
+    data.forEach(entry => {
+      const cfg = groomTypes[entry.type] || { label: entry.type, icon: '📋' };
+      const date = new Date(entry.recorded_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+      html += `<div class="health-item">
+        <div class="health-icon">${cfg.icon}</div>
+        <div class="health-info">
+          <div class="health-type">${cfg.label}</div>
+          ${entry.notes ? `<div class="health-desc">${esc(entry.notes)}</div>` : ''}
+          <div class="health-desc">${date}</div>
+          ${entry.next_appointment ? `<div class="health-due">📅 Volgende: ${new Date(entry.next_appointment).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}</div>` : ''}
+        </div>
+        <button class="health-delete" onclick="deleteGrooming('${esc(entry.id)}')">🗑️</button>
+      </div>`;
+    });
+    document.getElementById('grooming-list').innerHTML = html;
+  }
+
+  function openGroomingModal() {
+    document.getElementById('groom-type').value = 'tanden';
+    document.getElementById('groom-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('groom-next').value = '';
+    document.getElementById('groom-notes').value = '';
+    document.getElementById('groom-next-group').style.display = 'none';
+    document.getElementById('grooming-modal').classList.add('open');
+  }
+
+  function toggleGroomTrimmer() {
+    const isTrimmer = document.getElementById('groom-type').value === 'trimmer';
+    document.getElementById('groom-next-group').style.display = isTrimmer ? 'block' : 'none';
+  }
+
+  async function saveGrooming(btn) {
+    const type = document.getElementById('groom-type').value;
+    const date = document.getElementById('groom-date').value;
+    const next = document.getElementById('groom-next').value;
+    const notes = document.getElementById('groom-notes').value.trim();
+
+    setLoading(btn, true, 'Opslaan');
+    const { error } = await sb.from('grooming_entries').insert({
+      type,
+      recorded_at: date,
+      next_appointment: next || null,
+      notes: notes || null
+    });
+    setLoading(btn, false, 'Opslaan');
+    if (error) { showToast('Fout: ' + error.message); return; }
+    closeModal('grooming-modal');
+    showToast('Verzorging opgeslagen! ✂️');
+    loadGrooming();
+  }
+
+  async function deleteGrooming(id) {
+    if (!confirm('Verwijderen?')) return;
+    await sb.from('grooming_entries').delete().eq('id', id);
+    showToast('Verwijderd');
+    loadGrooming();
   }
 
   // Registreer de service worker zodat de app installeerbaar is als PWA
