@@ -2272,4 +2272,10 @@
     loadGrooming();
   }
 
-  // Registreer de ser
+  // Registreer de service worker zodat de app installeerbaar is als PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</body>
+</html>
