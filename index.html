@@ -1415,7 +1415,9 @@
       todayCount[s.command_id] = (todayCount[s.command_id] || 0) + 1;
     });
 
-    const standaardId = localStorage.getItem('loewieStandaard');
+    const { data: settingData } = await sb.from('app_settings').select('value').eq('key', 'standaard_command_id').single();
+    const standaardId = settingData?.value || null;
+
     const sorted = [...commands].sort((a, b) => {
       if (a.id === standaardId) return -1;
       if (b.id === standaardId) return 1;
@@ -1449,17 +1451,20 @@
   // ============================================================
   async function loadCommands() {
     const { from, to } = todayRange();
-    const standaardId = localStorage.getItem('loewieStandaard');
 
     const [
       { data: commands },
       { data: todaySessions },
-      { data: allSessions }
+      { data: allSessions },
+      { data: settingData }
     ] = await Promise.all([
       sb.from('commands').select('*').order('name'),
       sb.from('command_sessions').select('command_id, score').gte('practiced_at', from).lte('practiced_at', to),
-      sb.from('command_sessions').select('command_id, score')
+      sb.from('command_sessions').select('command_id, score'),
+      sb.from('app_settings').select('value').eq('key', 'standaard_command_id').single()
     ]);
+
+    const standaardId = settingData?.value || null;
 
     // Tel hoeveel keer elk commando vandaag geoefend is
     const todayCount = {};
@@ -1522,14 +1527,17 @@
     document.getElementById('commands-list').innerHTML = html;
   }
 
-  function setStandaard(id) {
-    const current = localStorage.getItem('loewieStandaard');
-    // Klik op dezelfde ster → zet standaard uit; anders → stel nieuwe in
+  async function setStandaard(id) {
+    const { data: settingData } = await sb.from('app_settings').select('value').eq('key', 'standaard_command_id').single();
+    const current = settingData?.value || null;
+
     if (current === id) {
-      localStorage.removeItem('loewieStandaard');
+      // Klik op dezelfde ster → zet standaard uit
+      await sb.from('app_settings').delete().eq('key', 'standaard_command_id');
       showToast('Standaard verwijderd');
     } else {
-      localStorage.setItem('loewieStandaard', id);
+      // Stel nieuw standaard commando in (upsert = aanmaken of overschrijven)
+      await sb.from('app_settings').upsert({ key: 'standaard_command_id', value: id });
       showToast('Standaard ingesteld! ⭐');
     }
     loadCommands();
