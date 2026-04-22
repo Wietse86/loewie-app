@@ -1343,6 +1343,10 @@
     currentUser = user;
     const { data: profile } = await sb.from('profiles').select('name').eq('id', user.id).single();
     currentUserName = profile?.name || user.email.split('@')[0];
+    // Zorg dat het profiel altijd bestaat (anders mislukken foreign key inserts)
+    if (!profile) {
+      await sb.from('profiles').upsert({ id: user.id, name: currentUserName });
+    }
     document.getElementById('user-avatar').textContent = currentUserName[0].toUpperCase();
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
