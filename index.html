@@ -1012,14 +1012,6 @@
         <div class="stat-number" id="stat-weight">–</div>
         <div class="stat-label">Huidig gewicht (kg)</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-number" id="stat-milestones">0</div>
-        <div class="stat-label">Mijlpalen bereikt</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="stat-diary">0</div>
-        <div class="stat-label">Dagboek notities</div>
-      </div>
     </div>
 
     <div class="card">
@@ -1027,9 +1019,24 @@
       <div class="week-bar" id="week-bar"></div>
     </div>
 
-    <div class="card" id="dashboard-commands-card">
+    <div class="card">
       <div class="card-title">Vandaag geoefend</div>
       <div id="dashboard-commands-list"><div class="loading">Laden...</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Laatste voeding 🍽️</div>
+      <div id="dashboard-feeding"><div class="loading">Laden...</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Gezondheid afspraken 💉</div>
+      <div id="dashboard-health"><div class="loading">Laden...</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Verzorging ✂️</div>
+      <div id="dashboard-grooming"><div class="loading">Laden...</div></div>
     </div>
   </div>
 
@@ -1455,25 +1462,104 @@
   async function loadDashboard() {
     const { from, to } = todayRange();
 
-    // Run all stat queries in parallel
     const [
       { data: sessions },
-      { data: weights },
-      { count: mCount },
-      { count: dCount }
+      { data: weights }
     ] = await Promise.all([
       sb.from('command_sessions').select('id').gte('practiced_at', from).lte('practiced_at', to),
-      sb.from('weight_entries').select('weight_kg').order('recorded_at', { ascending: false }).limit(1),
-      sb.from('milestones').select('id', { count: 'exact', head: true }),
-      sb.from('diary_entries').select('id', { count: 'exact', head: true })
+      sb.from('weight_entries').select('weight_kg').order('recorded_at', { ascending: false }).limit(1)
     ]);
 
     document.getElementById('stat-commands-today').textContent = sessions?.length || 0;
     document.getElementById('stat-weight').textContent = weights?.[0]?.weight_kg || '–';
-    document.getElementById('stat-milestones').textContent = mCount || 0;
-    document.getElementById('stat-diary').textContent = dCount || 0;
 
-    await Promise.all([loadWeekBar(), loadDashboardCommands()]);
+    await Promise.all([
+      loadWeekBar(),
+      loadDashboardCommands(),
+      loadDashboardFeeding(),
+      loadDashboardHealth(),
+      loadDashboardGrooming()
+    ]);
+  }
+
+  async function loadDashboardFeeding() {
+    const { data } = await sb.from('feeding_entries')
+      .select('*')
+      .order('recorded_at', { ascending: false })
+      .limit(1);
+
+    const el = document.getElementById('dashboard-feeding');
+    if (!data?.length) {
+      el.innerHTML = '<p style="color:var(--tan);font-size:0.9rem">Nog geen voeding ingevoerd.</p>';
+      return;
+    }
+    const entry = data[0];
+    const date = new Date(entry.recorded_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
+    el.innerHTML = `
+      <p style="font-size:0.8rem;color:var(--tan);margin-bottom:0.5rem">${date}</p>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap">
+        ${entry.wet_food_grams ? `<div style="background:var(--cream);border-radius:10px;padding:0.4rem 0.75rem;font-size:0.9rem"><strong>${entry.wet_food_grams}g</strong> 🥫 natvoer</div>` : ''}
+        ${entry.dry_food_grams ? `<div style="background:var(--cream);border-radius:10px;padding:0.4rem 0.75rem;font-size:0.9rem"><strong>${entry.dry_food_grams}g</strong> 🥣 brokken</div>` : ''}
+      </div>
+      ${entry.notes ? `<p style="font-size:0.8rem;color:var(--tan);margin-top:0.4rem">${esc(entry.notes)}</p>` : ''}`;
+  }
+
+  async function loadDashboardHealth() {
+    const { data } = await sb.from('health_entries')
+      .select('*')
+      .not('next_due', 'is', null)
+      .order('next_due', { ascending: true })
+      .limit(5);
+
+    const el = document.getElementById('dashboard-health');
+    if (!data?.length) {
+      el.innerHTML = '<p style="color:var(--tan);font-size:0.9rem">Geen afspraken gepland.</p>';
+      return;
+    }
+
+    const now = new Date();
+    let html = '';
+    data.forEach(entry => {
+      const due = new Date(entry.next_due);
+      const dueDate = due.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+      const overdue = due < now;
+      const diffDays = Math.ceil((due - now) / 86400000);
+      const when = overdue
+        ? `<span style="color:var(--red);font-weight:600">⚠️ Verlopen</span>`
+        : diffDays <= 7
+          ? `<span style="color:var(--accent);font-weight:600">Over ${diffDays} dag${diffDays === 1 ? '' : 'en'}</span>`
+          : `<span style="color:var(--green)">Over ${diffDays} dagen</span>`;
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid var(--sand)">
+        <div style="font-size:0.9rem">${healthIcons[entry.type] || '📋'} ${esc(entry.type)}</div>
+        <div style="font-size:0.8rem;text-align:right">${when}<br><span style="color:var(--tan)">${dueDate}</span></div>
+      </div>`;
+    });
+    el.innerHTML = html;
+  }
+
+  async function loadDashboardGrooming() {
+    const { data } = await sb.from('grooming_entries')
+      .select('type, recorded_at')
+      .order('recorded_at', { ascending: false });
+
+    const el = document.getElementById('dashboard-grooming');
+    const lastByType = {};
+    data?.forEach(e => { if (!lastByType[e.type]) lastByType[e.type] = e.recorded_at; });
+
+    const now = new Date();
+    let html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem">';
+    Object.entries(groomTypes).forEach(([key, cfg]) => {
+      const last = lastByType[key];
+      const days = last ? Math.floor((now - new Date(last)) / 86400000) : null;
+      const urgent = days === null || days >= cfg.urgentDays;
+      html += `<div style="background:var(--cream);border-radius:10px;padding:0.6rem 0.5rem;text-align:center">
+        <div style="font-size:1.3rem">${cfg.icon}</div>
+        <div style="font-family:'Fraunces',serif;font-size:1.2rem;color:${urgent ? 'var(--red)' : 'var(--accent)'}">${days === null ? '–' : days + 'd'}</div>
+        <div style="font-size:0.65rem;color:var(--tan);font-weight:600">${cfg.label}</div>
+      </div>`;
+    });
+    html += '</div>';
+    el.innerHTML = html;
   }
 
   async function loadWeekBar() {
